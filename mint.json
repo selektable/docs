@@ -3,9 +3,9 @@
   "name": "Selektable",
   "description": "AI-powered product visualization for ecommerce. Let customers see products in their space before they buy.",
   "colors": {
-    "primary": "#6D28D9",
-    "light": "#8B5CF6",
-    "dark": "#5B21B6"
+    "primary": "#171717",
+    "light": "#737373",
+    "dark": "#FAFAFA"
   },
   "logo": {
     "light": "/logo/light.svg",
