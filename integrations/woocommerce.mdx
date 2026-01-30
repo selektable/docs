@@ -5,18 +5,43 @@ description: Integrate Selektable with your WooCommerce store
 
 # WooCommerce Integration
 
-Selektable offers a native WooCommerce integration via OAuth that automatically connects your store. You can also integrate manually using PHP snippets.
+Selektable provides an official **WordPress plugin** for WooCommerce that handles embed script injection, product detection, variant image updates, and cart integration out of the box.
 
-## Option A: OAuth Integration (Recommended)
+## Option A: WordPress Plugin (Recommended)
 
-1. In the Selektable dashboard, create a new store and select **WooCommerce** as the platform
-2. Enter your store's domain
-3. Click **Connect** — you'll be redirected to your WooCommerce site to authorize the connection
-4. After authorization, Selektable can automatically fetch product data
+The easiest way to integrate Selektable with WooCommerce is the official plugin.
+
+### Installation
+
+<Steps>
+  <Step title="Download the plugin">
+    In the Selektable dashboard, open your widget and click **Embed Instructions**. Select the **WooCommerce** tab and download the plugin zip file.
+  </Step>
+  <Step title="Upload to WordPress">
+    In your WordPress admin, go to **Plugins → Add New → Upload Plugin**. Select the downloaded zip file and click **Install Now**.
+  </Step>
+  <Step title="Activate the plugin">
+    After installation, click **Activate Plugin**.
+  </Step>
+  <Step title="Configure">
+    Go to **WooCommerce → Settings → Selektable** and enter your Widget ID and App URL from the dashboard.
+  </Step>
+</Steps>
+
+The plugin automatically:
+- Adds the embed script to your site's footer
+- Injects a widget button after the "Add to Cart" button on product pages
+- Detects the current product and its images
+- Updates the product image when a customer selects a different variation
+- Handles cart integration via the WooCommerce Cart API
+
+<Note>
+  Requires WordPress 6.9+ and WooCommerce 8.8.6+.
+</Note>
 
 ## Option B: Manual Integration
 
-Add the following to your theme's `functions.php`:
+If you prefer not to use the plugin, you can add the integration manually via your theme's `functions.php`.
 
 ### 1. Add the Embed Script
 
@@ -124,7 +149,7 @@ This means even without explicit `productId` in the `open()` call, the widget ca
 
 ## Order Webhooks
 
-The OAuth integration automatically sets up order webhooks for conversion tracking. If you're using the manual integration, configure a webhook in WooCommerce:
+To enable conversion tracking, configure a webhook in WooCommerce:
 
 1. Go to **WooCommerce → Settings → Advanced → Webhooks**
 2. Add a new webhook:
