@@ -11,9 +11,9 @@ The `productImage` is the single most important input for AI generation quality.
 
 The ideal product image has:
 
-- **A clean, isolated background** — white, transparent, or minimal. Most ecommerce platforms already have product photos shot on a plain background. These work best.
-- **The product clearly visible** — no obstructions, overlapping items, or heavy styling
-- **Good lighting and resolution** — the AI needs to clearly see the product's shape, color, and texture
+- **A clean, isolated background:** white, transparent, or minimal. Most ecommerce platforms already have product photos shot on a plain background. These work best.
+- **The product clearly visible:** no obstructions, overlapping items, or heavy styling
+- **Good lighting and resolution:** the AI needs to clearly see the product's shape, color, and texture
 
 <Tip>
   Most ecommerce stores already have product photos with isolated backgrounds as their primary image. If your store follows standard product photography practices, the featured image is usually the right choice.
@@ -24,7 +24,7 @@ The ideal product image has:
 | Avoid | Why |
 |-------|-----|
 | **Product on a model** | The AI may pick up the model as part of the product, leading to artifacts in the output |
-| **Busy room settings** | A couch shown in a styled living room adds visual noise — the AI can't cleanly separate the product from the background |
+| **Busy room settings** | A couch shown in a styled living room adds visual noise. The AI can't cleanly separate the product from the background |
 | **Lifestyle shots** | Photos with lots of props, decorations, or environmental context confuse the AI about what the actual product is |
 | **Collages or multi-angle shots** | The AI expects a single, clear product view |
 | **Low resolution or cropped images** | The AI needs enough detail to render the product convincingly |
@@ -59,7 +59,7 @@ The product blends into a scene, making it hard for the AI to separate it from t
 
 ## WooCommerce: override generation image
 
-If you're using the **Selektable WordPress plugin**, you can override which image is used for AI generation on a per-product basis — without changing your product's featured image or gallery.
+If you're using the **Selektable WordPress plugin**, you can override which image is used for AI generation on a per-product basis, without changing your product's featured image or gallery.
 
 1. Open a product in the WordPress admin
 2. In the sidebar, find the **Selektable Widget** meta box
@@ -85,7 +85,7 @@ Selektable.open('widget_abc123', {
   // Use the clean product photo for AI generation
   productImage: 'https://myshop.com/images/sofa-isolated.jpg',
 
-  // The full gallery (including lifestyle shots) for the image selector
+  // The full gallery (including lifestyle shots) displayed in the widget
   productImages: [
     { id: 1, src: 'https://myshop.com/images/sofa-isolated.jpg', alt: 'Product photo' },
     { id: 2, src: 'https://myshop.com/images/sofa-lifestyle.jpg', alt: 'In living room' },
@@ -96,8 +96,8 @@ Selektable.open('widget_abc123', {
 
 Note that `productImage` and `productImages` serve different purposes:
 
-- **`productImage`** — the single image sent to the AI for generation. Pick your cleanest product shot.
-- **`productImages`** — the full gallery shown in the widget's image selector. Customers can browse these and switch which image is used for generation.
+- **`productImage`:** the single image sent to the AI for generation. Pick your cleanest product shot.
+- **`productImages`:** the full gallery displayed in the widget UI for browsing.
 
 ## Quick checklist
 

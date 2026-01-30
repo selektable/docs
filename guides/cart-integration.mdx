@@ -157,6 +157,6 @@ onAddToCart: async function (product, quantity) {
 
 ## Error handling
 
-If you don't provide `onAddToCart` but cart is enabled on the widget, the customer will see a `CART_HANDLER_NOT_CONFIGURED` error when they try to add to cart.
+If you don't provide `onAddToCart` but cart is enabled on the widget, the customer will see an error when they try to add to cart.
 
-If your callback throws an error, the widget catches it and shows a `CART_ADD_FAILED` error message.
+If your callback throws an error, the widget catches it and shows an error message to the customer.

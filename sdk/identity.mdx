@@ -24,14 +24,14 @@ Selektable.identify('user-123', {
 </ParamField>
 
 <ParamField path="traits" type="Record<string, unknown>">
-  Optional metadata about the user. Stored in `localStorage` as JSON.
+  Optional metadata about the user (name, email, etc.).
 </ParamField>
 
 **Behavior:**
-- Stores `userId` and `traits` in `localStorage`
-- Updates the cached `window.SelektableIdentity` object
+- Persists `userId` and `traits` in the browser
+- Updates the in-memory identity state
 - Sends identity update to all currently open widgets
-- Makes a fire-and-forget `POST /api/widgets/identify` call to the server
+- Sends the identity data to the Selektable server in the background
 
 ---
 
@@ -64,8 +64,8 @@ const identity = Selektable.getIdentity();
 
 ```typescript
 {
-  visitorId: string;      // Persistent browser ID (e.g., "vtid_a1b2c3d4e5f67890")
-  sessionId: string;      // Current session ID (e.g., "ssid_x9y8z7w6v5u43210")
+  visitorId: string;      // Persistent browser ID
+  sessionId: string;      // Current session ID
   anonymousId: string;    // Anonymous ID (initially same as visitorId)
   userId?: string;        // Set after identify() is called
   traits?: Record<string, unknown>;  // Set after identify() is called
@@ -87,9 +87,9 @@ Selektable.setVisitorId('my-tracking-id-abc');
 </ParamField>
 
 **Behavior:**
-- Overwrites the visitor ID in `localStorage`
+- Overwrites the visitor ID
 - If no user is identified, also updates the anonymous ID
-- Updates the cached identity object
+- Updates the in-memory identity state
 
 <Warning>
   Only use this if you manage your own visitor tracking. The auto-generated IDs work for most use cases.

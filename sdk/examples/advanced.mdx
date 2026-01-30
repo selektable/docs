@@ -164,7 +164,7 @@ function onLogout() {
   Selektable.reset();
 }
 
-// On page load — restore identity for logged-in users
+// On page load: restore identity for logged-in users
 window.addEventListener('load', function () {
   var user = getAuthenticatedUser();
   if (user) {
@@ -184,13 +184,10 @@ Monitor when customers close the widget (e.g., for analytics):
 window.addEventListener('message', function (event) {
   if (
     event.data &&
-    event.data._prefix === 'Selektable:' &&
     event.data.type === 'widget:modal-close'
   ) {
     // Customer closed the widget
-    analytics.track('widget_closed', {
-      widgetId: event.data.storeId
-    });
+    analytics.track('widget_closed');
   }
 });
 ```

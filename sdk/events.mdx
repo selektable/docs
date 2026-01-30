@@ -5,69 +5,39 @@ description: PostMessage events between the widget and your page
 
 # Events
 
-The Selektable SDK communicates with the widget iframe using the browser's `postMessage` API. All messages use the `Selektable:` prefix.
+The Selektable SDK communicates with the widget iframe using the browser's `postMessage` API.
 
 <Note>
-  You don't need to handle these events directly — the SDK manages them automatically. This reference is for advanced integrations or debugging.
+  You don't need to handle these events directly. The SDK manages them automatically. This reference is for debugging purposes.
 </Note>
 
-## Parent → widget messages
+## Key events
 
-These are sent from your page (via the SDK) to the widget iframe:
+The SDK handles several categories of events between your page and the widget:
 
-| Event | Description | Sent When |
-|-------|-------------|-----------|
-| `parent:open` | Tells the widget to show its UI | `open()` called, iframe ready |
-| `parent:close` | Tells the widget to hide its UI | `close()` called |
-| `parent:product-context` | Sends product data to the widget | Widget opens or product data changes |
-| `parent:identity` | Sends visitor identity data | Widget opens or `identify()` called |
-| `parent:locale` | Sends detected locale (from Weglot) | Widget opens or language changes |
-| `parent:cart-result` | Result of `onAddToCart` callback | After cart operation completes |
-| `parent:font-detected` | Detected heading/body fonts from page | Widget becomes ready |
+| Category | Description |
+|----------|-------------|
+| **Lifecycle** | Widget loading, opening, and closing |
+| **Product data** | Sending product information to the widget |
+| **Cart actions** | Add to cart, view cart, and checkout interactions |
+| **Identity** | Passing visitor identity to the widget |
 
-## Widget → parent messages
+## Listening for widget close
 
-These are sent from the widget iframe to your page:
-
-| Event | Description | Your SDK Handles |
-|-------|-------------|-----------------|
-| `widget:ready` | Widget iframe has finished loading | Shows iframe, removes loading overlay |
-| `widget:modal-close` | Customer closed the widget | Hides iframe, unlocks scroll |
-| `widget:error` | An error occurred in the widget | Logs to console |
-| `widget:add-to-cart` | Customer clicked "Add to Cart" | Calls your `onAddToCart` callback |
-| `widget:view-cart` | Customer clicked "View Cart" | Calls your `onViewCart` callback |
-| `widget:checkout` | Customer clicked "Checkout" | Calls your `onCheckout` callback |
-
-## Message format
-
-All messages follow this structure:
-
-```javascript
-{
-  _prefix: 'Selektable:',
-  type: 'event-name',
-  storeId: 'widget_abc123',
-  // ... additional fields depending on the event
-}
-```
-
-## Debugging
-
-Open your browser's developer console and monitor postMessage events:
+You can listen for when a customer closes the widget, for example to trigger analytics:
 
 ```javascript
 window.addEventListener('message', function (event) {
-  if (event.data && event.data._prefix === 'Selektable:') {
-    console.log('Selektable event:', event.data.type, event.data);
+  if (
+    event.data &&
+    event.data.type === 'widget:modal-close'
+  ) {
+    // Customer closed the widget
+    console.log('Widget closed');
   }
 });
 ```
 
 ## Security
 
-The SDK only processes messages where:
-- `event.origin` matches the Selektable app URL
-- `event.data._prefix` is `'Selektable:'`
-- `event.data.storeId` matches a known widget instance
-
-Messages from other origins or without the correct prefix are silently ignored.
+The SDK validates the origin and structure of all incoming messages. Messages from untrusted sources are silently ignored.

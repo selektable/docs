@@ -53,7 +53,7 @@ interface ProductOptions {
 </ParamField>
 
 <ParamField path="productImages" type="ProductImage[]">
-  Array of all product images. The widget may display these as an image selector.
+  Array of all product images displayed in the widget.
 
   ```typescript
   {
@@ -161,14 +161,7 @@ The widget resolves product data in this priority order:
 2. **Data attributes** on the context element (`data-selektable-widget`)
 3. **Auto-detection** from the page DOM (WooCommerce body classes, JSON-LD, variation forms, etc.)
 
-Auto-detection checks these sources:
-- WooCommerce `postid-*` body class
-- `form.variations_form[data-product_id]`
-- `button[name="add-to-cart"]` value
-- `input[name="product_id"]` value
-- JSON-LD `@type: Product` structured data
-- `[data-product-id]` or `[data-product_id]` attributes
-- URL pattern: `/product/[slug]`
+Auto-detection works with common ecommerce page structures, including WooCommerce product pages, JSON-LD structured data, and standard product data attributes.
 
 <Tip>
   For custom platforms, always pass product data explicitly via `Selektable.open()` options. Auto-detection is designed for WooCommerce pages.

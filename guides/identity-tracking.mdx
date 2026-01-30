@@ -39,8 +39,8 @@ Selektable.identify('user-123', {
 | `traits` | `object` | Optional key-value metadata (name, email, etc.) |
 
 This does three things:
-1. Stores the user ID and traits in `localStorage`
-2. Sends the identity to the Selektable server (fire-and-forget)
+1. Stores the user ID and traits in the browser
+2. Sends the identity to the Selektable server in the background
 3. Updates all currently open widgets with the new identity
 
 ## Resetting identity
@@ -52,7 +52,7 @@ When a user logs out, reset the identity to generate a new anonymous visitor:
 Selektable.reset();
 ```
 
-This generates new visitor, session, and anonymous IDs — the previous user association is cleared.
+This generates new visitor, session, and anonymous IDs. The previous user association is cleared.
 
 ## Reading the current identity
 
@@ -61,9 +61,9 @@ const identity = Selektable.getIdentity();
 
 console.log(identity);
 // {
-//   visitorId: 'vtid_a1b2c3d4e5f67890',
-//   sessionId: 'ssid_x9y8z7w6v5u43210',
-//   anonymousId: 'vtid_a1b2c3d4e5f67890',
+//   visitorId: 'abc123...',
+//   sessionId: 'def456...',
+//   anonymousId: 'abc123...',
 //   userId: 'user-123',          // undefined if not identified
 //   traits: { name: 'John Doe' } // undefined if not set
 // }
@@ -81,21 +81,9 @@ Selektable.setVisitorId('my-custom-visitor-id');
   Only use this if you have a specific reason to manage visitor IDs yourself. The auto-generated IDs work well for most use cases.
 </Warning>
 
-## Storage keys
-
-The SDK uses these `localStorage` and `sessionStorage` keys:
-
-| Key | Storage | Purpose |
-|-----|---------|---------|
-| `selektable_visitor_id` | `localStorage` | Persistent visitor ID |
-| `selektable_session_id` | `sessionStorage` | Current session ID |
-| `selektable_anonymous_id` | `localStorage` | Anonymous ID (pre-identify) |
-| `selektable_user_id` | `localStorage` | Identified user ID |
-| `selektable_traits` | `localStorage` | User traits (JSON) |
-
 ## Privacy considerations
 
-- All IDs are generated client-side using `crypto.randomUUID()` (with fallback)
-- No cookies are used — only `localStorage` and `sessionStorage`
+- All IDs are generated client-side in the browser
+- No cookies are used
 - Calling `Selektable.reset()` clears all stored identity data
 - If `localStorage` is unavailable (e.g., private browsing), ephemeral IDs are generated per page load

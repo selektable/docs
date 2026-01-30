@@ -24,13 +24,13 @@ After the embed script loads, it exposes a global `window.Selektable` object wit
 
 ## How it works
 
-The SDK operates as an [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) that:
+When the embed script loads, it:
 
-1. **Initializes identity** — generates or restores visitor/session IDs from browser storage
-2. **Discovers widget elements** — scans the DOM for `data-selektable-widget` attributes
-3. **Manages iframes** — creates, shows, hides, and communicates with widget iframes
-4. **Handles cart operations** — proxies add-to-cart requests between the widget and your callbacks
-5. **Detects context** — auto-detects product info, fonts, and translation service language
+1. **Initializes identity:** generates or restores visitor/session IDs from browser storage
+2. **Discovers widget elements:** scans the DOM for `data-selektable-widget` attributes
+3. **Manages iframes:** creates, shows, hides, and communicates with widget iframes
+4. **Handles cart operations:** proxies add-to-cart requests between the widget and your callbacks
+5. **Detects context:** auto-detects product info, fonts, and translation service language
 
 ## Widget states
 
@@ -53,10 +53,4 @@ Calling `preload()` moves the widget from `idle` to `ready` without showing it. 
 
 ## Browser support
 
-The SDK uses:
-- `localStorage` and `sessionStorage` for identity
-- `crypto.randomUUID()` with manual fallback for ID generation
-- `postMessage` for iframe communication
-- `fetch` for server calls (identity tracking)
-
-All modern browsers are supported. If `localStorage` is unavailable (e.g., Safari private browsing), the SDK generates ephemeral IDs that don't persist.
+All modern browsers are supported. The SDK uses standard web APIs (`localStorage`, `sessionStorage`, `postMessage`). If `localStorage` is unavailable (e.g., Safari private browsing), the SDK generates ephemeral IDs that don't persist.

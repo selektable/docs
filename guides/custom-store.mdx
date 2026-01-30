@@ -5,7 +5,7 @@ description: Complete guide to setting up a custom store with Selektable
 
 # Custom store setup
 
-A **custom store** lets you integrate Selektable with any ecommerce platform — whether you built it yourself, use a headless CMS, or run a platform we don't have a native integration for.
+A **custom store** lets you integrate Selektable with any ecommerce platform, whether you built it yourself, use a headless CMS, or run a platform we don't have a native integration for.
 
 Unlike WooCommerce or Shopify stores that connect via OAuth, custom stores are configured manually through the dashboard and integrated using the embed script.
 
@@ -75,7 +75,7 @@ Call `Selektable.open()` with your product data:
       // Primary image used for AI generation
       productImage: 'https://myshop.com/images/sofa-main.jpg',
 
-      // All product images (for image selector in widget)
+      // All product images (displayed in widget)
       productImages: [
         { id: 1, src: 'https://myshop.com/images/sofa-front.jpg', alt: 'Front view' },
         { id: 2, src: 'https://myshop.com/images/sofa-side.jpg', alt: 'Side view' },
@@ -274,7 +274,7 @@ Here's a complete product page integration:
     Ensure you're passing `productId` and at least one image in `productImages` or `productImage`. The widget needs product data to generate a visualization.
   </Accordion>
   <Accordion title="Add to cart shows an error">
-    If cart is enabled on the widget, you must provide an `onAddToCart` callback. Without it, the widget will report a `CART_HANDLER_NOT_CONFIGURED` error.
+    If cart is enabled on the widget, you must provide an `onAddToCart` callback. Without it, the widget will show an error when the customer tries to add to cart.
   </Accordion>
   <Accordion title="Images aren't loading in the widget">
     The product images must be publicly accessible URLs. If they're behind authentication or on a different CDN with restrictive CORS, the widget won't be able to load them.

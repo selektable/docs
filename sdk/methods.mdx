@@ -67,7 +67,7 @@ Creates the widget iframe in the background without showing it. When `open()` is
 // On page load
 Selektable.preload('widget_abc123');
 
-// Later, on button click — opens instantly
+// Later, on button click. Opens instantly
 Selektable.open('widget_abc123', { ... });
 ```
 
@@ -96,7 +96,7 @@ Selektable.discover();
 **Behavior:**
 - Finds all `[data-selektable-widget]` elements
 - Associates each element with its widget instance
-- Does **not** create iframes or open widgets — only registers context elements for later use
+- Does **not** create iframes or open widgets. It only registers context elements for later use
 - Called automatically on page load (DOMContentLoaded)
 
 Use this after dynamically adding widget elements to the page (e.g., in SPAs).
