@@ -1,0 +1,108 @@
+---
+title: Choosing the right product image
+description: How to select the best product image for AI generation
+---
+
+# Choosing the right product image
+
+The `productImage` is the single most important input for AI generation quality. This is the image the AI model uses to understand what your product looks like and render it into the customer's photo. Choosing the right one makes a significant difference in output quality.
+
+## What makes a good product image
+
+The ideal product image has:
+
+- **A clean, isolated background** — white, transparent, or minimal. Most ecommerce platforms already have product photos shot on a plain background. These work best.
+- **The product clearly visible** — no obstructions, overlapping items, or heavy styling
+- **Good lighting and resolution** — the AI needs to clearly see the product's shape, color, and texture
+
+<Tip>
+  Most ecommerce stores already have product photos with isolated backgrounds as their primary image. If your store follows standard product photography practices, the featured image is usually the right choice.
+</Tip>
+
+## What to avoid
+
+| Avoid | Why |
+|-------|-----|
+| **Product on a model** | The AI may pick up the model as part of the product, leading to artifacts in the output |
+| **Busy room settings** | A couch shown in a styled living room adds visual noise — the AI can't cleanly separate the product from the background |
+| **Lifestyle shots** | Photos with lots of props, decorations, or environmental context confuse the AI about what the actual product is |
+| **Collages or multi-angle shots** | The AI expects a single, clear product view |
+| **Low resolution or cropped images** | The AI needs enough detail to render the product convincingly |
+
+<Warning>
+  A common mistake is using a lifestyle or in-context photo as the generation image. For example, using a photo of a sofa in a decorated room instead of a clean product shot. The AI works best when it can clearly isolate the product.
+</Warning>
+
+## Examples
+
+### Good: isolated background
+
+The product is clearly visible on a clean background. The AI can easily identify the product shape and render it into the customer's space.
+
+```
+✅ Sofa on white background
+✅ Lamp on transparent background
+✅ Dress on a plain backdrop
+✅ Chair with simple drop shadow on white
+```
+
+### Bad: noisy context
+
+The product blends into a scene, making it hard for the AI to separate it from the surroundings.
+
+```
+❌ Sofa in a fully decorated living room
+❌ Lamp on a busy desk with books and plants
+❌ Dress on a model walking down the street
+❌ Chair at a dining table with place settings
+```
+
+## WooCommerce: override generation image
+
+If you're using the **Selektable WordPress plugin**, you can override which image is used for AI generation on a per-product basis — without changing your product's featured image or gallery.
+
+1. Open a product in the WordPress admin
+2. In the sidebar, find the **Selektable Widget** meta box
+3. Under **Override Generation Image**, click **Select Image**
+4. Choose the best product photo from your featured image and gallery images
+5. Save the product
+
+The selected image will be used as `productImage` when the widget opens on that product page. If no override is set, the plugin uses the product's featured image by default.
+
+<Tip>
+  This is useful when your featured image is a lifestyle shot for marketing purposes but you have a clean product photo in your gallery that works better for AI generation.
+</Tip>
+
+## Custom stores: passing the right image
+
+For custom integrations, you control which image is passed as `productImage` in your `Selektable.open()` call:
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+
+  // Use the clean product photo for AI generation
+  productImage: 'https://myshop.com/images/sofa-isolated.jpg',
+
+  // The full gallery (including lifestyle shots) for the image selector
+  productImages: [
+    { id: 1, src: 'https://myshop.com/images/sofa-isolated.jpg', alt: 'Product photo' },
+    { id: 2, src: 'https://myshop.com/images/sofa-lifestyle.jpg', alt: 'In living room' },
+    { id: 3, src: 'https://myshop.com/images/sofa-detail.jpg', alt: 'Fabric detail' }
+  ]
+});
+```
+
+Note that `productImage` and `productImages` serve different purposes:
+
+- **`productImage`** — the single image sent to the AI for generation. Pick your cleanest product shot.
+- **`productImages`** — the full gallery shown in the widget's image selector. Customers can browse these and switch which image is used for generation.
+
+## Quick checklist
+
+- [ ] Is the product on a clean or isolated background?
+- [ ] Is the product the only subject in the photo?
+- [ ] Is the image high resolution and well-lit?
+- [ ] Is the product free of obstructions (no models, props, or overlapping items)?
+- [ ] If using WooCommerce, have you set the override image for products where the featured image isn't ideal?
