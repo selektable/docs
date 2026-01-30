@@ -1,0 +1,120 @@
+---
+title: Methods
+description: Complete reference for all Selektable SDK methods
+---
+
+# Methods
+
+## `open(widgetId, options?)`
+
+Opens the widget modal. If the widget hasn't been loaded yet, shows a loading spinner while the iframe loads. If the widget was preloaded, opens instantly.
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 123,
+  productTitle: 'Blue Sofa',
+  productImage: 'https://example.com/sofa.jpg'
+});
+```
+
+**Parameters:**
+
+<ParamField path="widgetId" type="string" required>
+  The widget ID from your dashboard (e.g., `widget_abc123`).
+</ParamField>
+
+<ParamField path="options" type="ProductOptions">
+  Product data and cart callbacks. See [Product Options](/sdk/product-options) for the full reference.
+</ParamField>
+
+**Behavior:**
+- Locks page scroll while the widget is open
+- Sends identity, locale, and product context to the iframe
+- If called while the widget is already open, does nothing
+- If called while the widget is loading, waits for load to complete
+
+---
+
+## `close(widgetId)`
+
+Closes an open widget and unlocks page scroll.
+
+```javascript
+Selektable.close('widget_abc123');
+```
+
+<ParamField path="widgetId" type="string" required>
+  The widget ID to close.
+</ParamField>
+
+**Behavior:**
+- Hides the iframe (keeps it in DOM for fast re-opening)
+- Sets widget state back to `ready`
+- Unlocks page scroll
+- If the widget isn't open, does nothing
+
+<Note>
+  Customers can also close the widget by clicking the close button inside the widget UI. This sends a `widget:modal-close` message that the SDK handles automatically.
+</Note>
+
+---
+
+## `preload(widgetId)`
+
+Creates the widget iframe in the background without showing it. When `open()` is called later, the widget appears instantly.
+
+```javascript
+// On page load
+Selektable.preload('widget_abc123');
+
+// Later, on button click — opens instantly
+Selektable.open('widget_abc123', { ... });
+```
+
+<ParamField path="widgetId" type="string" required>
+  The widget ID to preload.
+</ParamField>
+
+**Behavior:**
+- Creates a hidden iframe in the DOM
+- The iframe loads the widget UI in the background
+- If an iframe already exists for this widget, does nothing
+- Does not lock scroll or show any overlay
+
+---
+
+## `discover()`
+
+Scans the DOM for elements with `data-selektable-widget` attributes and registers them as widget context elements.
+
+```javascript
+Selektable.discover();
+```
+
+**No parameters.**
+
+**Behavior:**
+- Finds all `[data-selektable-widget]` elements
+- Associates each element with its widget instance
+- Does **not** create iframes or open widgets — only registers context elements for later use
+- Called automatically on page load (DOMContentLoaded)
+
+Use this after dynamically adding widget elements to the page (e.g., in SPAs).
+
+**Data attributes recognized:**
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-selektable-widget` | Widget ID (required) |
+| `data-product-id` | Product ID |
+| `data-product-title` | Product title |
+| `data-product-images` | JSON array of product images |
+| `data-product-url` | Product page URL |
+
+```html
+<div data-selektable-widget="widget_abc123"
+     data-product-id="456"
+     data-product-title="Blue Sofa"
+     data-product-images='[{"id":1,"src":"https://example.com/sofa.jpg","alt":"Sofa"}]'>
+</div>
+```

@@ -1,0 +1,80 @@
+---
+title: Installation
+description: How to install the Selektable embed script
+---
+
+# Installation
+
+The Selektable SDK is loaded via a script tag — no npm packages or build tools required.
+
+## Script Tag
+
+Add the embed script before the closing `</body>` tag on every page where you want the widget available:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+```
+
+<Note>
+  Replace `app.selektable.com` with your instance URL if self-hosting.
+</Note>
+
+The script:
+- Loads asynchronously (`async`) so it doesn't block page rendering
+- Creates the global `window.Selektable` object
+- Auto-discovers `data-selektable-widget` elements on the page
+- Initializes visitor identity tracking
+
+## Verifying Installation
+
+Open your browser's developer console and check that the SDK is loaded:
+
+```javascript
+console.log(window.Selektable);
+// Should output an object with: open, close, preload, discover, identify, reset, getIdentity, setVisitorId
+```
+
+## Loading Order
+
+Since the script loads asynchronously, `window.Selektable` may not be available immediately. If you're calling SDK methods from inline scripts, ensure the SDK has loaded first:
+
+```html
+<script>
+  // Option 1: Check before calling
+  function openWidget() {
+    if (window.Selektable) {
+      Selektable.open('widget_abc123', { ... });
+    }
+  }
+</script>
+```
+
+```html
+<script>
+  // Option 2: Wait for load event
+  window.addEventListener('load', function () {
+    Selektable.preload('widget_abc123');
+  });
+</script>
+```
+
+<Tip>
+  For click handlers on buttons, the SDK will almost always be loaded by the time a user clicks. The guard is mainly needed for code that runs immediately on page load.
+</Tip>
+
+## Multiple Widgets
+
+You only need one script tag per page, even if you have multiple widgets. The SDK manages all widget instances through a single registry.
+
+```html
+<!-- One script tag -->
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<!-- Multiple widgets -->
+<button onclick="Selektable.open('widget_room')">Room Visualizer</button>
+<button onclick="Selektable.open('widget_tryon')">Virtual Try-On</button>
+```
+
+## Re-execution Safety
+
+The script is safe to re-execute (e.g., in SPA navigations). The widget instance registry persists across re-executions, and the message handler is only registered once.

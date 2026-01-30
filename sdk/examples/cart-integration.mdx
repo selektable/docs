@@ -1,0 +1,178 @@
+---
+title: Cart Integration Examples
+description: Examples for integrating add-to-cart functionality
+---
+
+# Cart Integration Examples
+
+## Simple REST API
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa.jpg',
+
+  onAddToCart: async function (product, quantity) {
+    const response = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: product.id,
+        quantity: quantity
+      })
+    });
+
+    const data = await response.json();
+
+    return {
+      success: response.ok,
+      error: response.ok ? undefined : data.message,
+      cartUrl: '/cart'
+    };
+  },
+
+  onViewCart: function () {
+    window.location.href = '/cart';
+  },
+
+  onCheckout: function () {
+    window.location.href = '/checkout';
+  }
+});
+```
+
+## With Variable Products
+
+Handle products with variations (size, color, etc.):
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'tshirt-001',
+  productTitle: 'Classic T-Shirt',
+  productImage: 'https://myshop.com/images/tshirt-blue.jpg',
+  type: 'variable',
+
+  variations: [
+    {
+      id: 101,
+      attributes: [
+        { name: 'Color', value: 'Blue' },
+        { name: 'Size', value: 'M' }
+      ],
+      is_in_stock: true
+    },
+    {
+      id: 102,
+      attributes: [
+        { name: 'Color', value: 'Red' },
+        { name: 'Size', value: 'L' }
+      ],
+      is_in_stock: true
+    }
+  ],
+
+  attributes: [
+    {
+      id: 1,
+      name: 'Color',
+      taxonomy: 'pa_color',
+      has_variations: true,
+      terms: [
+        { id: 10, name: 'Blue', slug: 'blue' },
+        { id: 11, name: 'Red', slug: 'red' }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Size',
+      taxonomy: 'pa_size',
+      has_variations: true,
+      terms: [
+        { id: 20, name: 'M', slug: 'm' },
+        { id: 21, name: 'L', slug: 'l' }
+      ]
+    }
+  ],
+
+  onAddToCart: async function (product, quantity, variation) {
+    // variation: [{ attribute: 'Color', value: 'Blue' }, { attribute: 'Size', value: 'M' }]
+    const body = {
+      productId: product.id,
+      quantity: quantity
+    };
+
+    if (variation) {
+      body.attributes = {};
+      variation.forEach(function (v) {
+        body.attributes[v.attribute.toLowerCase()] = v.value;
+      });
+    }
+
+    const response = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    return { success: response.ok };
+  }
+});
+```
+
+## Error Handling
+
+Handle cart failures gracefully:
+
+```javascript
+onAddToCart: async function (product, quantity) {
+  try {
+    const response = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: product.id,
+        quantity: quantity
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return {
+        success: false,
+        error: error.message || 'Failed to add to cart'
+      };
+    }
+
+    return {
+      success: true,
+      cartUrl: '/cart'
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: 'Network error. Please try again.'
+    };
+  }
+}
+```
+
+## Firebase / Firestore Cart
+
+```javascript
+onAddToCart: async function (product, quantity) {
+  const { doc, updateDoc, arrayUnion } = await import('firebase/firestore');
+  const cartRef = doc(db, 'carts', currentUser.uid);
+
+  await updateDoc(cartRef, {
+    items: arrayUnion({
+      productId: product.id,
+      title: product.title,
+      quantity: quantity,
+      addedAt: new Date()
+    })
+  });
+
+  return { success: true, cartUrl: '/cart' };
+}
+```

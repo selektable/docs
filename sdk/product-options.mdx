@@ -1,0 +1,173 @@
+---
+title: Product Options
+description: Full reference for the ProductOptions object passed to Selektable.open()
+---
+
+# Product Options
+
+The `ProductOptions` object is the second argument to `Selektable.open()`. It provides product data and cart callbacks to the widget.
+
+## Reference
+
+```typescript
+interface ProductOptions {
+  // Product information
+  productId?: string | number;
+  productTitle?: string;
+  productImage?: string;
+  productImages?: ProductImage[];
+  productUrl?: string;
+
+  // Product type (for cart integration)
+  type?: 'simple' | 'variable' | 'grouped' | 'external';
+
+  // Variable product data
+  variations?: ProductVariation[];
+  attributes?: ProductAttribute[];
+  is_purchasable?: boolean;
+  is_in_stock?: boolean;
+
+  // Cart callbacks
+  onAddToCart?: (product, quantity, variation?) => Promise<CartResult> | CartResult | void;
+  onViewCart?: () => void;
+  onCheckout?: () => void;
+}
+```
+
+## Product Information
+
+<ParamField path="productId" type="string | number">
+  Unique identifier for the product. Used to track generations and conversions.
+</ParamField>
+
+<ParamField path="productTitle" type="string">
+  Display name of the product. Shown in the widget UI.
+</ParamField>
+
+<ParamField path="productImage" type="string">
+  Primary image URL used for AI generation. This is the image the AI model uses to render the product in the customer's photo.
+
+  If not provided, the first image in `productImages` is used.
+</ParamField>
+
+<ParamField path="productImages" type="ProductImage[]">
+  Array of all product images. The widget may display these as an image selector.
+
+  ```typescript
+  {
+    id: number;       // Unique image ID
+    src: string;      // Image URL
+    alt?: string;     // Alt text
+    name?: string;    // Image name
+  }
+  ```
+</ParamField>
+
+<ParamField path="productUrl" type="string">
+  URL of the product page. Used for sharing and navigation.
+</ParamField>
+
+## Variable Product Data
+
+These fields are primarily used for WooCommerce-style variable products where a single product has multiple variations (e.g., different colors/sizes).
+
+<ParamField path="type" type="string">
+  Product type. One of: `simple`, `variable`, `grouped`, `external`.
+</ParamField>
+
+<ParamField path="variations" type="array">
+  Available variations for variable products.
+
+  ```typescript
+  {
+    id: number;
+    attributes: Array<{
+      name: string;        // e.g., "Color"
+      value: string | null; // e.g., "Blue", or null for "any"
+    }>;
+    is_in_stock?: boolean;
+  }
+  ```
+</ParamField>
+
+<ParamField path="attributes" type="array">
+  Product attributes that have variations.
+
+  ```typescript
+  {
+    id: number;
+    name: string;          // e.g., "Color"
+    taxonomy: string;      // e.g., "pa_color"
+    has_variations: boolean;
+    terms: Array<{
+      id: number;
+      name: string;        // e.g., "Blue"
+      slug: string;        // e.g., "blue"
+    }>;
+  }
+  ```
+</ParamField>
+
+<ParamField path="is_purchasable" type="boolean">
+  Whether the product can be purchased. If `false`, the add-to-cart button may be hidden.
+</ParamField>
+
+<ParamField path="is_in_stock" type="boolean">
+  Whether the product is in stock.
+</ParamField>
+
+## Cart Callbacks
+
+<ParamField path="onAddToCart" type="function">
+  Called when the customer clicks "Add to Cart" in the widget. See [Cart Integration](/guides/cart-integration) for details.
+
+  **Signature:**
+  ```typescript
+  (product: CartProduct, quantity: number, variation?: CartVariation[]) =>
+    Promise<CartResult> | CartResult | void
+  ```
+
+  **CartProduct:**
+  ```typescript
+  { id: number; title: string; price?: string; image?: string }
+  ```
+
+  **CartVariation:**
+  ```typescript
+  { attribute: string; value: string }
+  ```
+
+  **CartResult:**
+  ```typescript
+  { success: boolean; error?: string; cartUrl?: string }
+  ```
+</ParamField>
+
+<ParamField path="onViewCart" type="function">
+  Called when the customer clicks "View Cart" after a successful add-to-cart.
+</ParamField>
+
+<ParamField path="onCheckout" type="function">
+  Called when the customer clicks "Checkout" after a successful add-to-cart.
+</ParamField>
+
+## Product Context Resolution
+
+The widget resolves product data in this priority order:
+
+1. **Explicit options** passed to `Selektable.open(widgetId, options)` — highest priority
+2. **Data attributes** on the context element (`data-selektable-widget`)
+3. **Auto-detection** from the page DOM (WooCommerce body classes, JSON-LD, variation forms, etc.)
+
+Auto-detection checks these sources:
+- WooCommerce `postid-*` body class
+- `form.variations_form[data-product_id]`
+- `button[name="add-to-cart"]` value
+- `input[name="product_id"]` value
+- JSON-LD `@type: Product` structured data
+- `[data-product-id]` or `[data-product_id]` attributes
+- URL pattern: `/product/[slug]`
+
+<Tip>
+  For custom platforms, always pass product data explicitly via `Selektable.open()` options. Auto-detection is designed for WooCommerce pages.
+</Tip>

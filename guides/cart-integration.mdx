@@ -1,0 +1,162 @@
+---
+title: Cart Integration
+description: Let customers add products to their cart from the visualization
+---
+
+# Cart Integration
+
+When cart integration is enabled on a widget, customers can add products to their shopping cart directly from the visualization result screen. You implement the actual cart logic through callbacks.
+
+## How It Works
+
+1. The customer generates a visualization and sees the result
+2. They click **Add to Cart** in the widget
+3. The widget sends a `widget:add-to-cart` message to your page
+4. Your `onAddToCart` callback handles the cart operation
+5. The widget shows a success or error state based on your response
+
+## Enabling Cart Integration
+
+First, enable cart in the widget configuration in the dashboard. Then provide the callbacks when opening the widget:
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'prod-456',
+  productTitle: 'Modern Sofa',
+  productImage: 'https://myshop.com/sofa.jpg',
+
+  onAddToCart: async function (product, quantity, variation) {
+    // Your cart logic here
+    return { success: true };
+  },
+
+  onViewCart: function () {
+    window.location.href = '/cart';
+  },
+
+  onCheckout: function () {
+    window.location.href = '/checkout';
+  }
+});
+```
+
+## Callback Reference
+
+### `onAddToCart(product, quantity, variation)`
+
+Called when the customer clicks "Add to Cart" in the widget.
+
+**Parameters:**
+
+<ResponseField name="product" type="object" required>
+  The product to add.
+  <Expandable>
+    <ResponseField name="id" type="number" required>Product ID</ResponseField>
+    <ResponseField name="title" type="string" required>Product title</ResponseField>
+    <ResponseField name="price" type="string">Product price</ResponseField>
+    <ResponseField name="image" type="string">Product image URL</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="quantity" type="number" required>
+  Number of items to add.
+</ResponseField>
+
+<ResponseField name="variation" type="array">
+  Selected product variations (for variable products).
+  <Expandable>
+    <ResponseField name="attribute" type="string" required>Variation attribute name (e.g., "color")</ResponseField>
+    <ResponseField name="value" type="string" required>Selected value (e.g., "blue")</ResponseField>
+  </Expandable>
+</ResponseField>
+
+**Return value:**
+
+Return an object (or a `Promise` that resolves to one):
+
+```typescript
+{
+  success: boolean;   // Whether the add-to-cart succeeded
+  error?: string;     // Error message to display (if success is false)
+  cartUrl?: string;   // URL to the cart page (shown as link on success)
+}
+```
+
+If the callback returns `void` or `undefined`, it's treated as `{ success: true }`.
+
+### `onViewCart()`
+
+Called when the customer clicks "View Cart" after adding to cart. Navigate them to your cart page.
+
+### `onCheckout()`
+
+Called when the customer clicks "Checkout" after adding to cart. Navigate them to your checkout page.
+
+## Examples
+
+### Simple REST API Cart
+
+```javascript
+onAddToCart: async function (product, quantity) {
+  const response = await fetch('/api/cart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      productId: product.id,
+      quantity: quantity
+    })
+  });
+
+  if (!response.ok) {
+    return { success: false, error: 'Could not add to cart' };
+  }
+
+  return { success: true, cartUrl: '/cart' };
+}
+```
+
+### WooCommerce AJAX Cart
+
+```javascript
+onAddToCart: async function (product, quantity, variation) {
+  const formData = new FormData();
+  formData.append('product_id', product.id);
+  formData.append('quantity', quantity);
+
+  if (variation) {
+    variation.forEach(function (v) {
+      formData.append('attribute_' + v.attribute, v.value);
+    });
+  }
+
+  const response = await fetch('/?wc-ajax=add_to_cart', {
+    method: 'POST',
+    body: formData
+  });
+
+  return { success: response.ok };
+}
+```
+
+### Shopify AJAX Cart
+
+```javascript
+onAddToCart: async function (product, quantity) {
+  const response = await fetch('/cart/add.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: product.id,
+      quantity: quantity
+    })
+  });
+
+  return { success: response.ok, cartUrl: '/cart' };
+}
+```
+
+## Error Handling
+
+If you don't provide `onAddToCart` but cart is enabled on the widget, the customer will see a `CART_HANDLER_NOT_CONFIGURED` error when they try to add to cart.
+
+If your callback throws an error, the widget catches it and shows a `CART_ADD_FAILED` error message.

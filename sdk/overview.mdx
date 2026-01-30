@@ -1,0 +1,62 @@
+---
+title: SDK Overview
+description: Introduction to the Selektable client SDK
+---
+
+# SDK Overview
+
+The Selektable client SDK is a lightweight JavaScript library that runs on your product pages. It manages the widget lifecycle, product context, identity tracking, and communication between your page and the widget iframe.
+
+## Global Object
+
+After the embed script loads, it exposes a global `window.Selektable` object with the following methods:
+
+| Method | Description |
+|--------|-------------|
+| [`open(widgetId, options?)`](/sdk/methods#open) | Open a widget with optional product data |
+| [`close(widgetId)`](/sdk/methods#close) | Close an open widget |
+| [`preload(widgetId)`](/sdk/methods#preload) | Preload a widget iframe for faster opening |
+| [`discover()`](/sdk/methods#discover) | Auto-discover `data-selektable-widget` elements |
+| [`identify(userId, traits?)`](/sdk/identity#identify) | Associate visitor with a user identity |
+| [`reset()`](/sdk/identity#reset) | Clear stored identity |
+| [`getIdentity()`](/sdk/identity#getidentity) | Get current identity object |
+| [`setVisitorId(id)`](/sdk/identity#setvisitorid) | Manually set the visitor ID |
+
+## How It Works
+
+The SDK operates as an [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) that:
+
+1. **Initializes identity** — generates or restores visitor/session IDs from browser storage
+2. **Discovers widget elements** — scans the DOM for `data-selektable-widget` attributes
+3. **Manages iframes** — creates, shows, hides, and communicates with widget iframes
+4. **Handles cart operations** — proxies add-to-cart requests between the widget and your callbacks
+5. **Detects context** — auto-detects product info, fonts, and translation service language
+
+## Widget States
+
+Each widget instance goes through these states:
+
+```
+idle → loading → ready → open
+                   ↑       ↓
+                   └───────┘
+```
+
+| State | Description |
+|-------|-------------|
+| `idle` | No iframe created yet |
+| `loading` | Iframe created, waiting for it to load (shows loading spinner) |
+| `ready` | Iframe loaded, widget can be opened instantly |
+| `open` | Widget is visible and interactive |
+
+Calling `preload()` moves the widget from `idle` to `ready` without showing it. Calling `open()` on an already `ready` widget shows it instantly with no loading spinner.
+
+## Browser Support
+
+The SDK uses:
+- `localStorage` and `sessionStorage` for identity
+- `crypto.randomUUID()` with manual fallback for ID generation
+- `postMessage` for iframe communication
+- `fetch` for server calls (identity tracking)
+
+All modern browsers are supported. If `localStorage` is unavailable (e.g., Safari private browsing), the SDK generates ephemeral IDs that don't persist.

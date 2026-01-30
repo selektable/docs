@@ -1,0 +1,133 @@
+---
+title: WooCommerce
+description: Integrate Selektable with your WooCommerce store
+---
+
+# WooCommerce Integration
+
+Selektable offers a native WooCommerce integration via OAuth that automatically connects your store. You can also integrate manually using PHP snippets.
+
+## Option A: OAuth Integration (Recommended)
+
+1. In the Selektable dashboard, create a new store and select **WooCommerce** as the platform
+2. Enter your store's domain
+3. Click **Connect** — you'll be redirected to your WooCommerce site to authorize the connection
+4. After authorization, Selektable can automatically fetch product data
+
+## Option B: Manual Integration
+
+Add the following to your theme's `functions.php`:
+
+### 1. Add the Embed Script
+
+```php
+// Set your widget ID and app URL
+define('SELEKTABLE_WIDGET_ID', 'widget_abc123');
+define('SELEKTABLE_APP_URL', 'https://app.selektable.com');
+
+// Add embed script to footer
+add_action('wp_footer', function() {
+    printf(
+        '<script src="%s/widgets/embed.js" async></script>',
+        esc_url(SELEKTABLE_APP_URL)
+    );
+});
+```
+
+### 2. Add the Widget Button
+
+```php
+// Add button after Add to Cart
+add_action('woocommerce_after_add_to_cart_button', function() {
+    global $product;
+    if (!$product) return;
+
+    $image_id = $product->get_image_id();
+    $selected_image = $image_id ? wp_get_attachment_url($image_id) : '';
+
+    $product_data = [
+        'productId' => $product->get_id(),
+        'productTitle' => $product->get_name(),
+        'productImage' => $selected_image,
+        'productUrl' => get_permalink($product->get_id()),
+        'productImages' => []
+    ];
+
+    // Add product images
+    if ($image_id) {
+        $product_data['productImages'][] = [
+            'id' => (int) $image_id,
+            'src' => $selected_image,
+            'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true) ?: '',
+            'name' => get_the_title($image_id)
+        ];
+    }
+
+    printf(
+        '<button type="button" class="button selektable-try-on" onclick="Selektable.open(\'%s\', %s)">View in your room</button>',
+        esc_attr(SELEKTABLE_WIDGET_ID),
+        wp_json_encode($product_data)
+    );
+});
+```
+
+### 3. Handle Variation Changes (Optional)
+
+```html
+<script>
+jQuery(function($) {
+    $('form.variations_form').on('found_variation', function(e, variation) {
+        // Update the product image when the customer selects a variation
+        window.selektableProductImage = variation.image?.src || '';
+    });
+});
+</script>
+```
+
+### 4. Cart Integration (Optional)
+
+```javascript
+// Example custom add-to-cart handler for WooCommerce
+Selektable.open('widget_abc123', {
+    productId: 123,
+    productImage: window.selektableProductImage,
+    onAddToCart: async function(product, qty, variation) {
+        const formData = new FormData();
+        formData.append('product_id', product.id);
+        formData.append('quantity', qty);
+
+        if (variation) {
+            variation.forEach(function(v) {
+                formData.append('attribute_' + v.attribute, v.value);
+            });
+        }
+
+        const response = await fetch('/?wc-ajax=add_to_cart', {
+            method: 'POST',
+            body: formData
+        });
+        return { success: response.ok };
+    }
+});
+```
+
+## Auto-Detection
+
+The SDK automatically detects WooCommerce product data from the page DOM, including:
+
+- Product ID from `postid-*` body class
+- Product ID from `form.variations_form[data-product_id]`
+- Product ID from `button[name="add-to-cart"]` value
+- Product ID from `input[name="product_id"]` value
+
+This means even without explicit `productId` in the `open()` call, the widget can often find the right product on WooCommerce pages.
+
+## Order Webhooks
+
+The OAuth integration automatically sets up order webhooks for conversion tracking. If you're using the manual integration, configure a webhook in WooCommerce:
+
+1. Go to **WooCommerce → Settings → Advanced → Webhooks**
+2. Add a new webhook:
+   - **Topic**: Order created
+   - **Delivery URL**: `https://app.selektable.com/api/webhooks/woocommerce/orders`
+   - **Status**: Active

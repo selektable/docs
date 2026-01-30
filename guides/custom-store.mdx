@@ -1,0 +1,282 @@
+---
+title: Custom Store Setup
+description: Complete guide to setting up a custom store with Selektable
+---
+
+# Custom Store Setup
+
+A **custom store** lets you integrate Selektable with any ecommerce platform — whether you built it yourself, use a headless CMS, or run a platform we don't have a native integration for.
+
+Unlike WooCommerce or Shopify stores that connect via OAuth, custom stores are configured manually through the dashboard and integrated using the embed script.
+
+## Step 1: Create a Store
+
+1. Log in to the [Selektable dashboard](https://app.selektable.com)
+2. Navigate to your organization
+3. Click **Add Store**
+4. Fill in the details:
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| **Name** | Display name for your store (e.g., "My Furniture Shop") | Yes |
+| **Platform** | Select **Custom** | Yes |
+| **Domain** | Your store's domain (e.g., `myshop.com`) | No |
+| **Currency** | Default currency code (e.g., `EUR`, `USD`) | No |
+
+5. Click **Create Store**
+
+## Step 2: Create a Widget
+
+Each store can have multiple widgets. You need at least one to get started.
+
+1. Open your store in the dashboard
+2. Click **Add Widget**
+3. Configure:
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Internal name (e.g., "Room Visualizer - Living Room") |
+| **Type** | `room-visualizer` or `virtual-try-on` |
+| **Custom Prompt Hint** | Optional context for the AI (e.g., "This is a modern furniture store") |
+| **Accent Color** | Primary button color in the widget |
+| **Retention Hours** | How long generated images are kept (1-720 hours, default 24) |
+
+4. Click **Create Widget**
+5. Copy the **Widget ID** (e.g., `widget_abc123`)
+
+## Step 3: Add the Embed Script
+
+Add the Selektable script to every page where you want the widget available. Place it before the closing `</body>` tag:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+```
+
+<Tip>
+  The script is lightweight and loads asynchronously, so it won't block your page rendering.
+</Tip>
+
+## Step 4: Add the Widget Button
+
+### Option A: JavaScript API (Recommended)
+
+Call `Selektable.open()` with your product data:
+
+```html
+<button id="try-on-btn" type="button">View in your room</button>
+
+<script>
+  document.getElementById('try-on-btn').addEventListener('click', function () {
+    Selektable.open('widget_abc123', {
+      // Required
+      productId: 'prod-456',
+      productTitle: 'Modern Blue Sofa',
+
+      // Primary image used for AI generation
+      productImage: 'https://myshop.com/images/sofa-main.jpg',
+
+      // All product images (for image selector in widget)
+      productImages: [
+        { id: 1, src: 'https://myshop.com/images/sofa-front.jpg', alt: 'Front view' },
+        { id: 2, src: 'https://myshop.com/images/sofa-side.jpg', alt: 'Side view' },
+        { id: 3, src: 'https://myshop.com/images/sofa-back.jpg', alt: 'Back view' }
+      ],
+
+      // Product page URL
+      productUrl: 'https://myshop.com/products/modern-blue-sofa'
+    });
+  });
+</script>
+```
+
+### Option B: Data Attributes
+
+Use HTML data attributes for declarative setup:
+
+```html
+<div
+  data-selektable-widget="widget_abc123"
+  data-product-id="prod-456"
+  data-product-title="Modern Blue Sofa"
+  data-product-images='[{"id":1,"src":"https://myshop.com/images/sofa.jpg","alt":"Sofa"}]'
+  data-product-url="https://myshop.com/products/modern-blue-sofa"
+>
+  <button type="button">View in your room</button>
+</div>
+
+<script>
+  // Auto-discover elements with data-selektable-widget
+  Selektable.discover();
+</script>
+```
+
+<Note>
+  When using data attributes, `Selektable.discover()` registers the elements but doesn't create iframes until `Selektable.open()` is called. You still need to call `open()` from a click handler or trigger.
+</Note>
+
+## Step 5: Add Cart Integration (Optional)
+
+If you want customers to add products to their cart from the visualization result screen, provide cart callbacks:
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'prod-456',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa.jpg',
+
+  // Cart callbacks
+  onAddToCart: async function (product, quantity, variation) {
+    // product: { id, title, price?, image? }
+    // quantity: number
+    // variation: [{ attribute: 'color', value: 'blue' }] (optional)
+
+    const response = await fetch('/api/cart/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: product.id,
+        quantity: quantity,
+        variation: variation
+      })
+    });
+
+    return {
+      success: response.ok,
+      error: response.ok ? undefined : 'Failed to add to cart',
+      cartUrl: '/cart'  // Optional: URL to redirect after adding
+    };
+  },
+
+  onViewCart: function () {
+    window.location.href = '/cart';
+  },
+
+  onCheckout: function () {
+    window.location.href = '/checkout';
+  }
+});
+```
+
+<Warning>
+  If cart is enabled on your widget but you don't provide `onAddToCart`, the widget will show an error when the customer tries to add to cart.
+</Warning>
+
+## Step 6: Set Up Order Webhooks (Optional)
+
+To track conversions, send order data to Selektable when a purchase is made:
+
+```
+POST https://app.selektable.com/api/webhooks/orders
+Content-Type: application/json
+```
+
+```json
+{
+  "orderId": "order-789",
+  "storeId": "store_xxx",
+  "customerEmail": "customer@example.com",
+  "items": [
+    {
+      "productId": "prod-456",
+      "quantity": 1,
+      "price": 899.00
+    }
+  ],
+  "total": 899.00,
+  "currency": "EUR"
+}
+```
+
+This enables conversion attribution in your analytics dashboard.
+
+## Step 7: Identify Customers (Optional)
+
+If your site has user accounts, associate the visitor with their user ID for better tracking:
+
+```javascript
+// After login or page load with authenticated user
+Selektable.identify('user-123', {
+  name: 'John Doe',
+  email: 'john@example.com'
+});
+```
+
+See [Identity Tracking](/guides/identity-tracking) for details.
+
+## Full Example
+
+Here's a complete product page integration:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modern Blue Sofa - My Shop</title>
+</head>
+<body>
+  <h1>Modern Blue Sofa</h1>
+  <img src="https://myshop.com/images/sofa.jpg" alt="Modern Blue Sofa" />
+  <p>$899.00</p>
+
+  <button onclick="addToCart()">Add to Cart</button>
+  <button onclick="openVisualizer()">View in Your Room</button>
+
+  <script src="https://app.selektable.com/widgets/embed.js" async></script>
+  <script>
+    function openVisualizer() {
+      Selektable.open('widget_abc123', {
+        productId: 'sofa-001',
+        productTitle: 'Modern Blue Sofa',
+        productImage: 'https://myshop.com/images/sofa.jpg',
+        productImages: [
+          { id: 1, src: 'https://myshop.com/images/sofa.jpg', alt: 'Front view' }
+        ],
+        productUrl: window.location.href,
+
+        onAddToCart: async function (product, quantity) {
+          const res = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product.id, quantity })
+          });
+          return { success: res.ok };
+        },
+
+        onViewCart: function () {
+          window.location.href = '/cart';
+        },
+
+        onCheckout: function () {
+          window.location.href = '/checkout';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Widget button doesn't do anything">
+    Make sure the embed script has loaded before calling `Selektable.open()`. The script loads asynchronously, so if your button fires before the script is ready, `Selektable` will be `undefined`. Wrap your call in a check:
+
+    ```javascript
+    if (window.Selektable) {
+      Selektable.open('widget_abc123', { ... });
+    } else {
+      console.error('Selektable SDK not loaded yet');
+    }
+    ```
+  </Accordion>
+  <Accordion title="Widget opens but shows no product">
+    Ensure you're passing `productId` and at least one image in `productImages` or `productImage`. The widget needs product data to generate a visualization.
+  </Accordion>
+  <Accordion title="Add to cart shows an error">
+    If cart is enabled on the widget, you must provide an `onAddToCart` callback. Without it, the widget will report a `CART_HANDLER_NOT_CONFIGURED` error.
+  </Accordion>
+  <Accordion title="Images aren't loading in the widget">
+    The product images must be publicly accessible URLs. If they're behind authentication or on a different CDN with restrictive CORS, the widget won't be able to load them.
+  </Accordion>
+</AccordionGroup>

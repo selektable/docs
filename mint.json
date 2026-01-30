@@ -1,91 +1,95 @@
 {
-  "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Selektable",
+  "description": "AI-powered product visualization for ecommerce. Let customers see products in their space before they buy.",
+  "colors": {
+    "primary": "#6D28D9",
+    "light": "#8B5CF6",
+    "dark": "#5B21B6"
+  },
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.svg",
-  "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
-    "anchors": {
-      "from": "#0D9373",
-      "to": "#07C983"
+  "navbar": {
+    "links": [
+      {
+        "label": "Dashboard",
+        "href": "https://app.selektable.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "https://app.selektable.com"
     }
   },
-  "topbarLinks": [
-    {
-      "name": "Support",
-      "url": "mailto:hi@mintlify.com"
-    }
-  ],
-  "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "how-it-works"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/custom-store",
+              "guides/widgets",
+              "guides/cart-integration",
+              "guides/identity-tracking",
+              "guides/localization"
+            ]
+          },
+          {
+            "group": "Platform Integrations",
+            "pages": [
+              "integrations/woocommerce",
+              "integrations/shopify",
+              "integrations/custom-platform"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDK Reference",
+        "groups": [
+          {
+            "group": "Client SDK",
+            "pages": [
+              "sdk/overview",
+              "sdk/installation",
+              "sdk/methods",
+              "sdk/product-options",
+              "sdk/identity",
+              "sdk/events"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "sdk/examples/basic-usage",
+              "sdk/examples/cart-integration",
+              "sdk/examples/multi-product",
+              "sdk/examples/advanced"
+            ]
+          }
+        ]
+      }
+    ]
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
+  "footer": {
+    "socials": {
+      "website": "https://selektable.com",
+      "github": "https://github.com/addtoview-org"
     }
-  ],
-  "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
-    },
-    {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Get Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "development"
-      ]
-    },
-    {
-      "group": "Essentials",
-      "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
-      ]
-    },
-    {
-      "group": "API Documentation",
-      "pages": [
-        "api-reference/introduction"
-      ]
-    },
-    {
-      "group": "Endpoint Examples",
-      "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
-      ]
-    }
-  ],
-  "footerSocials": {
-    "x": "https://x.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://linkedin.com/company/mintlify"
   }
 }

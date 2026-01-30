@@ -1,0 +1,177 @@
+---
+title: Custom Platform
+description: Integrate Selektable with any custom ecommerce platform
+---
+
+# Custom Platform Integration
+
+For platforms other than WooCommerce or Shopify, use the generic JavaScript integration. This works with any website — whether it's built with Next.js, Nuxt, Ruby on Rails, Django, or plain HTML.
+
+## Quick Setup
+
+```html
+<!-- 1. Add the embed script -->
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<!-- 2. Add a button -->
+<button onclick="openWidget()">View in your room</button>
+
+<!-- 3. Open the widget with product data -->
+<script>
+function openWidget() {
+  Selektable.open('widget_abc123', {
+    productId: 123,
+    productTitle: 'Product Name',
+    productImage: 'https://example.com/product.jpg',
+    productImages: [
+      { id: 1, src: 'https://example.com/product.jpg', alt: 'Product' }
+    ],
+    productUrl: 'https://example.com/product',
+
+    onAddToCart: async function(product, quantity, variation) {
+      // Implement your cart logic
+      const response = await yourCartApi.add(product.id, quantity);
+      return {
+        success: response.ok,
+        error: response.ok ? undefined : 'Failed to add to cart'
+      };
+    },
+
+    onViewCart: function() {
+      window.location.href = '/cart';
+    },
+
+    onCheckout: function() {
+      window.location.href = '/checkout';
+    }
+  });
+}
+</script>
+```
+
+## What You Need to Implement
+
+### Required
+
+| Item | Description |
+|------|-------------|
+| **Product data** | Pass `productId`, `productTitle`, and `productImage` to `Selektable.open()` |
+
+### Optional
+
+| Item | Description |
+|------|-------------|
+| **Cart callbacks** | `onAddToCart`, `onViewCart`, `onCheckout` for cart integration |
+| **Order webhook** | `POST` order data to `/api/webhooks/orders` for conversion tracking |
+| **Identity** | Call `Selektable.identify()` for logged-in users |
+| **Preloading** | Call `Selektable.preload()` for instant widget opening |
+
+## Order Webhook
+
+To track conversions, send a webhook when an order is placed:
+
+```
+POST https://app.selektable.com/api/webhooks/orders
+Content-Type: application/json
+```
+
+```json
+{
+  "orderId": "order-789",
+  "storeId": "store_xxx",
+  "customerEmail": "customer@example.com",
+  "items": [
+    {
+      "productId": "prod-456",
+      "quantity": 1,
+      "price": 899.00
+    }
+  ],
+  "total": 899.00,
+  "currency": "EUR"
+}
+```
+
+## Server-Side Product Data
+
+If your product data lives server-side, render it into the page and pass it to the SDK:
+
+<CodeGroup>
+
+```html HTML + Server Template
+<!-- EJS / Handlebars / Jinja2 / etc. -->
+<script>
+  var productData = {
+    productId: '<%= product.id %>',
+    productTitle: '<%= product.name %>',
+    productImage: '<%= product.images[0].url %>',
+    productImages: <%- JSON.stringify(product.images) %>,
+    productUrl: window.location.href
+  };
+</script>
+
+<button onclick="Selektable.open('widget_abc123', productData)">
+  View in your room
+</button>
+```
+
+```jsx React / Next.js
+export default function ProductPage({ product }) {
+  function openWidget() {
+    window.Selektable.open('widget_abc123', {
+      productId: product.id,
+      productTitle: product.name,
+      productImage: product.images[0]?.url,
+      productImages: product.images.map((img, i) => ({
+        id: i, src: img.url, alt: img.alt
+      })),
+      productUrl: window.location.href
+    });
+  }
+
+  return <button onClick={openWidget}>View in your room</button>;
+}
+```
+
+```python Django Template
+<script>
+  var productData = {
+    productId: '{{ product.id }}',
+    productTitle: '{{ product.name|escapejs }}',
+    productImage: '{{ product.image.url }}',
+    productUrl: '{{ request.build_absolute_uri }}'
+  };
+</script>
+
+<button onclick="Selektable.open('widget_abc123', productData)">
+  View in your room
+</button>
+```
+
+</CodeGroup>
+
+## Headless CMS / API-Driven
+
+For headless setups where product data is fetched client-side:
+
+```javascript
+// Fetch product data from your API
+const product = await fetch('/api/products/123').then(r => r.json());
+
+// Open widget with fetched data
+Selektable.open('widget_abc123', {
+  productId: product.id,
+  productTitle: product.name,
+  productImage: product.images[0].url,
+  productImages: product.images.map((img, i) => ({
+    id: i,
+    src: img.url,
+    alt: img.alt || product.name
+  })),
+  productUrl: window.location.href
+});
+```
+
+## Full Reference
+
+For the complete list of options and methods, see the [SDK Reference](/sdk/overview).

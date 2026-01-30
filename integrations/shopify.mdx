@@ -1,0 +1,119 @@
+---
+title: Shopify
+description: Integrate Selektable with your Shopify store
+---
+
+# Shopify Integration
+
+Integrate Selektable into your Shopify store by adding the embed script and widget button to your product template.
+
+## Setup
+
+### 1. Add the Embed Script
+
+Add the script to your theme's `theme.liquid` file, before the closing `</body>` tag:
+
+```liquid
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+```
+
+### 2. Add the Widget Button
+
+Add the following to your product template (typically `sections/main-product.liquid` or similar):
+
+```liquid
+<button
+  type="button"
+  class="selektable-try-on"
+  id="selektable-btn"
+  data-product-id="{{ product.selected_or_first_available_variant.id }}"
+  data-product-image="{{ product.selected_or_first_available_variant.featured_image.src | image_url: width: 1024 | default: product.featured_image | image_url: width: 1024 }}"
+>
+  View in your room
+</button>
+
+<script>
+document.getElementById('selektable-btn').addEventListener('click', function() {
+  var btn = this;
+  Selektable.open('widget_abc123', {
+    productId: btn.dataset.productId,
+    productTitle: {{ product.title | json }},
+    productImage: btn.dataset.productImage,
+    productUrl: {{ product.url | json }},
+    productImages: [
+      {% for image in product.images limit: 5 %}
+      {
+        id: {{ image.id }},
+        src: {{ image.src | image_url: width: 1024 | json }},
+        alt: {{ image.alt | json }}
+      }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ],
+
+    // Cart integration using Shopify AJAX API
+    onAddToCart: async function(product, qty) {
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: product.id, quantity: qty })
+      });
+      return { success: response.ok };
+    },
+
+    onViewCart: function() {
+      window.location.href = '/cart';
+    },
+
+    onCheckout: function() {
+      window.location.href = '/checkout';
+    }
+  });
+});
+</script>
+```
+
+### 3. Handle Variant Changes
+
+Update the button data when the customer selects a different variant:
+
+```html
+<script>
+document.addEventListener('variant:changed', function(e) {
+  var btn = document.getElementById('selektable-btn');
+  if (btn && e.detail && e.detail.variant) {
+    btn.dataset.productId = e.detail.variant.id;
+    if (e.detail.variant.featured_image) {
+      btn.dataset.productImage = e.detail.variant.featured_image.src;
+    }
+  }
+});
+</script>
+```
+
+<Note>
+  The `variant:changed` event name depends on your theme. Some themes use `variantChange` or dispatch custom events. Check your theme's JavaScript for the correct event name.
+</Note>
+
+## Order Webhooks
+
+To enable conversion tracking, set up an order webhook:
+
+1. Go to **Settings → Notifications → Webhooks**
+2. Create a webhook:
+   - **Event**: Order creation
+   - **URL**: `https://app.selektable.com/api/webhooks/shopify/orders`
+   - **Format**: JSON
+
+## Styling the Button
+
+Add CSS to match your theme:
+
+```css
+.selektable-try-on {
+  /* Match your theme's button styles */
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+```

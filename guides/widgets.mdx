@@ -1,0 +1,85 @@
+---
+title: Widgets
+description: Configuring and managing Selektable widgets
+---
+
+# Widgets
+
+A **widget** is the visualization experience embedded on your product pages. Each store can have multiple widgets with different configurations.
+
+## Widget Types
+
+| Type | Best For | Description |
+|------|----------|-------------|
+| **Room Visualizer** | Furniture, decor, wall art, rugs, lighting | Renders products into a room photo |
+| **Virtual Try-On** | Clothing, accessories, eyewear | Renders products onto a person photo |
+
+## Creating a Widget
+
+1. Open your store in the Selektable dashboard
+2. Click **Add Widget**
+3. Choose a widget type and configure the options below
+4. Copy the widget ID from the embed instructions
+
+## Configuration Options
+
+### Appearance
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| **Accent Color** | Primary color for buttons and interactive elements | Inherited from store |
+| **Accent Foreground Color** | Text color on accent-colored elements | Auto-detected |
+| **Secondary Color** | Secondary UI color | System default |
+| **Heading Font** | Font for headings (system, Google, or custom) | Inherited from parent page |
+| **Body Font** | Font for body text | Inherited from parent page |
+
+<Tip>
+  The widget automatically detects fonts from your page. You only need to set fonts explicitly if you want the widget to use different fonts than your site.
+</Tip>
+
+### Generation
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| **Custom Prompt Hint** | Additional context for the AI model (max 500 chars). Use this to describe your product category or style. | None |
+| **Retention Hours** | How long generated images are stored (1-720 hours) | 24 |
+
+### Features
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| **Multi-Product** | Allow 2-5 products per visualization | Disabled |
+| **Show Products in Result** | Display product cards in the result view | Enabled |
+| **Cart Integration** | Enable add-to-cart from the result view | Disabled |
+
+### Integrations
+
+| Option | Description |
+|--------|-------------|
+| **WhatsApp** | Allow customers to share results via WhatsApp |
+
+## Multi-Product Mode
+
+When enabled, customers can select multiple products to visualize together. This is useful for showing how items complement each other — for example, a sofa with a matching coffee table and rug.
+
+Configure the maximum number of products (2-5) in the widget settings.
+
+## Font Detection
+
+The embed script automatically detects your site's heading and body fonts by inspecting the computed styles of `<h1>` and `<body>` elements. These are sent to the widget iframe so the UI matches your site's typography.
+
+To override this, set explicit fonts in the widget configuration.
+
+## Preloading
+
+For faster widget opening, you can preload the iframe before the user clicks:
+
+```javascript
+// Preload on page load (creates hidden iframe)
+Selektable.preload('widget_abc123');
+
+// Later, when user clicks, it opens instantly
+Selektable.open('widget_abc123', { ... });
+```
+
+This is especially useful on product pages where you expect high engagement with the widget.

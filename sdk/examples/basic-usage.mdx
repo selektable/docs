@@ -1,0 +1,131 @@
+---
+title: Basic Usage
+description: Simple examples to get started with the Selektable SDK
+---
+
+# Basic Usage
+
+## Minimal Example
+
+The simplest integration — a button that opens the widget with product data:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<button onclick="Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa.jpg'
+})">
+  View in your room
+</button>
+```
+
+## With Multiple Product Images
+
+Provide multiple images so customers can choose which angle to visualize:
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa-front.jpg',
+  productImages: [
+    { id: 1, src: 'https://myshop.com/images/sofa-front.jpg', alt: 'Front view' },
+    { id: 2, src: 'https://myshop.com/images/sofa-side.jpg', alt: 'Side view' },
+    { id: 3, src: 'https://myshop.com/images/sofa-top.jpg', alt: 'Top view' }
+  ],
+  productUrl: 'https://myshop.com/products/modern-blue-sofa'
+});
+```
+
+<Tip>
+  `productImage` sets the primary image used for AI generation. `productImages` provides the full gallery for the image selector in the widget.
+</Tip>
+
+## Preloading for Instant Open
+
+Preload the widget iframe on page load so it opens instantly when clicked:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<script>
+  window.addEventListener('load', function () {
+    Selektable.preload('widget_abc123');
+  });
+</script>
+
+<button onclick="Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa.jpg'
+})">
+  View in your room
+</button>
+```
+
+## Using Data Attributes
+
+Declarative approach using HTML data attributes:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<div
+  data-selektable-widget="widget_abc123"
+  data-product-id="sofa-001"
+  data-product-title="Modern Blue Sofa"
+  data-product-images='[{"id":1,"src":"https://myshop.com/images/sofa.jpg","alt":"Sofa"}]'
+>
+  <button onclick="Selektable.open('widget_abc123')">
+    View in your room
+  </button>
+</div>
+```
+
+The SDK auto-discovers the data attributes and merges them with any options passed to `open()`.
+
+## With Identity Tracking
+
+Associate visualizations with logged-in customers:
+
+```html
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<script>
+  // After page load, identify the user if logged in
+  window.addEventListener('load', function () {
+    // Replace with your actual user data
+    var user = getCurrentUser(); // your auth function
+    if (user) {
+      Selektable.identify(user.id, {
+        name: user.name,
+        email: user.email
+      });
+    }
+  });
+</script>
+```
+
+## Dynamic Product Pages (SPA)
+
+For single-page applications where products change without full page reloads:
+
+```javascript
+// When product changes in your SPA
+function onProductChange(product) {
+  // Just pass the new product data when opening
+  document.getElementById('try-on-btn').onclick = function () {
+    Selektable.open('widget_abc123', {
+      productId: product.id,
+      productTitle: product.name,
+      productImage: product.image,
+      productImages: product.images.map(function (img, i) {
+        return { id: i, src: img.url, alt: img.alt };
+      }),
+      productUrl: window.location.href
+    });
+  };
+}
+```

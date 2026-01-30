@@ -1,0 +1,101 @@
+---
+title: Identity Tracking
+description: Associate visualizations with customer identities across sessions
+---
+
+# Identity Tracking
+
+Selektable automatically tracks visitors using browser storage. You can optionally associate visitors with known user identities for better analytics and cross-device tracking.
+
+## Automatic Tracking
+
+The embed script automatically generates and manages:
+
+| ID | Storage | Scope | Description |
+|----|---------|-------|-------------|
+| **Visitor ID** | `localStorage` | Persistent | Unique identifier for the browser, survives tab closes |
+| **Session ID** | `sessionStorage` | Tab/session | Resets when the tab is closed |
+| **Anonymous ID** | `localStorage` | Persistent | Initially same as visitor ID, preserved after `identify()` |
+
+These IDs are automatically included in all widget API calls without any configuration needed.
+
+## Identifying Known Users
+
+When a customer logs into your site, call `identify()` to associate their visitor ID with their user account:
+
+```javascript
+// After user login or on page load with authenticated user
+Selektable.identify('user-123', {
+  name: 'John Doe',
+  email: 'john@example.com'
+});
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `userId` | `string` | Your system's user ID |
+| `traits` | `object` | Optional key-value metadata (name, email, etc.) |
+
+This does three things:
+1. Stores the user ID and traits in `localStorage`
+2. Sends the identity to the Selektable server (fire-and-forget)
+3. Updates all currently open widgets with the new identity
+
+## Resetting Identity
+
+When a user logs out, reset the identity to generate a new anonymous visitor:
+
+```javascript
+// On logout
+Selektable.reset();
+```
+
+This generates new visitor, session, and anonymous IDs — the previous user association is cleared.
+
+## Reading the Current Identity
+
+```javascript
+const identity = Selektable.getIdentity();
+
+console.log(identity);
+// {
+//   visitorId: 'vtid_a1b2c3d4e5f67890',
+//   sessionId: 'ssid_x9y8z7w6v5u43210',
+//   anonymousId: 'vtid_a1b2c3d4e5f67890',
+//   userId: 'user-123',          // undefined if not identified
+//   traits: { name: 'John Doe' } // undefined if not set
+// }
+```
+
+## Setting a Custom Visitor ID
+
+If you have your own visitor tracking system, you can override the auto-generated visitor ID:
+
+```javascript
+Selektable.setVisitorId('my-custom-visitor-id');
+```
+
+<Warning>
+  Only use this if you have a specific reason to manage visitor IDs yourself. The auto-generated IDs work well for most use cases.
+</Warning>
+
+## Storage Keys
+
+The SDK uses these `localStorage` and `sessionStorage` keys:
+
+| Key | Storage | Purpose |
+|-----|---------|---------|
+| `selektable_visitor_id` | `localStorage` | Persistent visitor ID |
+| `selektable_session_id` | `sessionStorage` | Current session ID |
+| `selektable_anonymous_id` | `localStorage` | Anonymous ID (pre-identify) |
+| `selektable_user_id` | `localStorage` | Identified user ID |
+| `selektable_traits` | `localStorage` | User traits (JSON) |
+
+## Privacy Considerations
+
+- All IDs are generated client-side using `crypto.randomUUID()` (with fallback)
+- No cookies are used — only `localStorage` and `sessionStorage`
+- Calling `Selektable.reset()` clears all stored identity data
+- If `localStorage` is unavailable (e.g., private browsing), ephemeral IDs are generated per page load

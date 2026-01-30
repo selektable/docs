@@ -1,0 +1,59 @@
+---
+title: How It Works
+description: Understanding the Selektable visualization pipeline
+---
+
+# How It Works
+
+Selektable uses AI image generation to create realistic product visualizations. Here's what happens under the hood when a customer uses the widget.
+
+## The Flow
+
+<Steps>
+  <Step title="Customer opens the widget">
+    The customer clicks the widget button on your product page. The Selektable embed script opens a full-screen modal with the widget UI.
+  </Step>
+  <Step title="Customer uploads a photo">
+    For **Room Visualizer**, they upload a photo of their room. For **Virtual Try-On**, they upload a photo of themselves.
+  </Step>
+  <Step title="AI generates the visualization">
+    Selektable sends the customer's photo and your product image to an AI model. The model renders the product realistically into the scene.
+  </Step>
+  <Step title="Customer sees the result">
+    The generated image is displayed in the widget. The customer can download it, share it, or add the product to their cart.
+  </Step>
+</Steps>
+
+## Architecture
+
+The system consists of three parts:
+
+| Component | Description |
+|-----------|-------------|
+| **Dashboard** | Web app where you manage stores, widgets, and view analytics |
+| **Embed Script** | JavaScript SDK loaded on your product pages |
+| **Widget iframe** | The visualization UI, rendered inside an iframe on your site |
+
+The embed script handles communication between your page and the widget iframe using the `postMessage` API. This means the widget works on any domain without CORS issues.
+
+## Widget Types
+
+<CardGroup cols={2}>
+  <Card title="Room Visualizer">
+    Best for furniture, home decor, wall art, rugs, and lighting. The customer uploads a room photo and the AI places the product in the scene with realistic perspective and lighting.
+  </Card>
+  <Card title="Virtual Try-On">
+    Best for clothing, accessories, and eyewear. The customer uploads a photo of themselves and the AI renders the product on them.
+  </Card>
+</CardGroup>
+
+## Conversion Tracking
+
+Selektable tracks visualizations and correlates them with purchases:
+
+1. Each customer gets a persistent **visitor ID** stored in `localStorage`
+2. When a customer generates a visualization, it's recorded with their visitor ID
+3. When an order is placed, the webhook matches the order to any recent visualizations
+4. The **attribution window** (default: 7 days) determines how far back to look
+
+This gives you data on how many visualizations convert into actual purchases.

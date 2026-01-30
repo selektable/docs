@@ -1,0 +1,208 @@
+---
+title: Advanced Examples
+description: Advanced integration patterns for the Selektable SDK
+---
+
+# Advanced Examples
+
+## Conditional Widget Loading
+
+Only load the widget on product pages:
+
+```html
+<script>
+  // Only load embed script on product pages
+  if (document.querySelector('[data-product-id]')) {
+    var script = document.createElement('script');
+    script.src = 'https://app.selektable.com/widgets/embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }
+</script>
+```
+
+## Multiple Widget Types on One Page
+
+Use different widgets for different product categories:
+
+```javascript
+function openVisualizer(product) {
+  // Choose widget based on product category
+  var widgetId = product.category === 'clothing'
+    ? 'widget_tryon'   // Virtual Try-On
+    : 'widget_room';   // Room Visualizer
+
+  Selektable.open(widgetId, {
+    productId: product.id,
+    productTitle: product.name,
+    productImage: product.image,
+    productUrl: product.url
+  });
+}
+```
+
+## React Integration
+
+```jsx
+import { useCallback } from 'react';
+
+function ProductPage({ product }) {
+  const openWidget = useCallback(() => {
+    if (!window.Selektable) return;
+
+    window.Selektable.open('widget_abc123', {
+      productId: product.id,
+      productTitle: product.name,
+      productImage: product.images[0]?.url,
+      productImages: product.images.map((img, i) => ({
+        id: i,
+        src: img.url,
+        alt: img.alt
+      })),
+      productUrl: window.location.href,
+
+      onAddToCart: async (cartProduct, quantity) => {
+        const res = await addToCart(cartProduct.id, quantity);
+        return { success: res.ok };
+      }
+    });
+  }, [product]);
+
+  return (
+    <button onClick={openWidget}>
+      View in your room
+    </button>
+  );
+}
+```
+
+## Vue Integration
+
+```vue
+<template>
+  <button @click="openWidget">View in your room</button>
+</template>
+
+<script setup>
+const props = defineProps(['product']);
+
+function openWidget() {
+  if (!window.Selektable) return;
+
+  window.Selektable.open('widget_abc123', {
+    productId: props.product.id,
+    productTitle: props.product.name,
+    productImage: props.product.images[0]?.url,
+    productImages: props.product.images.map((img, i) => ({
+      id: i,
+      src: img.url,
+      alt: img.alt
+    })),
+    productUrl: window.location.href,
+
+    async onAddToCart(product, quantity) {
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, quantity })
+      });
+      return { success: res.ok };
+    }
+  });
+}
+</script>
+```
+
+## Svelte Integration
+
+```svelte
+<script>
+  let { product } = $props();
+
+  function openWidget() {
+    if (!window.Selektable) return;
+
+    window.Selektable.open('widget_abc123', {
+      productId: product.id,
+      productTitle: product.name,
+      productImage: product.images[0]?.url,
+      productImages: product.images.map((img, i) => ({
+        id: i,
+        src: img.url,
+        alt: img.alt
+      })),
+      productUrl: window.location.href,
+
+      async onAddToCart(cartProduct, quantity) {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: cartProduct.id, quantity })
+        });
+        return { success: res.ok };
+      }
+    });
+  }
+</script>
+
+<button onclick={openWidget}>View in your room</button>
+```
+
+## Login/Logout Identity Flow
+
+```javascript
+// On login
+async function onLogin(user) {
+  Selektable.identify(user.id, {
+    name: user.name,
+    email: user.email
+  });
+}
+
+// On logout
+function onLogout() {
+  Selektable.reset();
+}
+
+// On page load — restore identity for logged-in users
+window.addEventListener('load', function () {
+  var user = getAuthenticatedUser();
+  if (user) {
+    Selektable.identify(user.id, {
+      name: user.name,
+      email: user.email
+    });
+  }
+});
+```
+
+## Listening for Widget Close
+
+Monitor when customers close the widget (e.g., for analytics):
+
+```javascript
+window.addEventListener('message', function (event) {
+  if (
+    event.data &&
+    event.data._prefix === 'Selektable:' &&
+    event.data.type === 'widget:modal-close'
+  ) {
+    // Customer closed the widget
+    analytics.track('widget_closed', {
+      widgetId: event.data.storeId
+    });
+  }
+});
+```
+
+## Custom Visitor ID from Your Analytics
+
+If you already have a visitor tracking system (e.g., Segment, Amplitude):
+
+```javascript
+// Use your existing visitor ID
+var myVisitorId = getMyAnalyticsVisitorId();
+Selektable.setVisitorId(myVisitorId);
+```
+
+This ensures Selektable's conversion data correlates with your existing analytics.

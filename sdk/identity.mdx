@@ -1,0 +1,96 @@
+---
+title: Identity
+description: SDK methods for managing customer identity
+---
+
+# Identity Methods
+
+The SDK provides methods to manage customer identity for analytics and cross-session tracking. See [Identity Tracking](/guides/identity-tracking) for a conceptual overview.
+
+## `identify(userId, traits?)`
+
+Associates the current visitor with a known user identity. Call this after a user logs in.
+
+```javascript
+Selektable.identify('user-123', {
+  name: 'John Doe',
+  email: 'john@example.com',
+  plan: 'premium'
+});
+```
+
+<ParamField path="userId" type="string" required>
+  Your system's unique user identifier.
+</ParamField>
+
+<ParamField path="traits" type="Record<string, unknown>">
+  Optional metadata about the user. Stored in `localStorage` as JSON.
+</ParamField>
+
+**Behavior:**
+- Stores `userId` and `traits` in `localStorage`
+- Updates the cached `window.SelektableIdentity` object
+- Sends identity update to all currently open widgets
+- Makes a fire-and-forget `POST /api/widgets/identify` call to the server
+
+---
+
+## `reset()`
+
+Clears the stored identity and generates new anonymous IDs. Call this when a user logs out.
+
+```javascript
+Selektable.reset();
+```
+
+**No parameters.**
+
+**Behavior:**
+- Generates a new visitor ID, session ID, and anonymous ID
+- Removes stored user ID and traits
+- Updates all open widgets with the new identity
+
+---
+
+## `getIdentity()`
+
+Returns the current identity object.
+
+```javascript
+const identity = Selektable.getIdentity();
+```
+
+**Returns:**
+
+```typescript
+{
+  visitorId: string;      // Persistent browser ID (e.g., "vtid_a1b2c3d4e5f67890")
+  sessionId: string;      // Current session ID (e.g., "ssid_x9y8z7w6v5u43210")
+  anonymousId: string;    // Anonymous ID (initially same as visitorId)
+  userId?: string;        // Set after identify() is called
+  traits?: Record<string, unknown>;  // Set after identify() is called
+}
+```
+
+---
+
+## `setVisitorId(visitorId)`
+
+Manually overrides the auto-generated visitor ID.
+
+```javascript
+Selektable.setVisitorId('my-tracking-id-abc');
+```
+
+<ParamField path="visitorId" type="string" required>
+  Custom visitor ID to use.
+</ParamField>
+
+**Behavior:**
+- Overwrites the visitor ID in `localStorage`
+- If no user is identified, also updates the anonymous ID
+- Updates the cached identity object
+
+<Warning>
+  Only use this if you manage your own visitor tracking. The auto-generated IDs work for most use cases.
+</Warning>

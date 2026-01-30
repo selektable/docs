@@ -1,0 +1,62 @@
+---
+title: Localization
+description: Multi-language support for Selektable widgets
+---
+
+# Localization
+
+Selektable widgets support multiple languages out of the box, with the ability to customize strings per locale.
+
+## Supported Languages
+
+| Locale | Language |
+|--------|----------|
+| `en` | English (default) |
+| `nl` | Dutch |
+| `de` | German |
+
+## How Locale Detection Works
+
+The widget determines the active locale in this order:
+
+1. **Translation service** — If Weglot is detected on the page, the widget uses the current Weglot language
+2. **Widget configuration** — The default locale set in the widget config
+3. **Fallback** — English (`en`)
+
+## Weglot Integration
+
+If your site uses [Weglot](https://weglot.com) for translation, the widget automatically:
+
+1. Detects the current Weglot language on widget open
+2. Listens for language changes and updates the widget in real-time
+
+No configuration needed — the embed script handles this automatically.
+
+## Custom Locale Strings
+
+You can customize the text shown in widgets through the widget configuration in the dashboard. Each locale supports these categories of strings:
+
+### Variant Strings
+
+Text specific to the widget type (room visualizer or virtual try-on):
+
+- Upload prompt text
+- Generation loading text
+- Result heading
+
+### Marketing Strings
+
+- Marketing consent checkbox label
+- Post-generation CTA text
+
+### Integration Strings
+
+- WhatsApp share message text
+
+## Adding a Custom Locale
+
+To support a language beyond en/nl/de, configure custom locale strings in the widget settings. The widget will use your custom strings when the detected locale matches.
+
+<Note>
+  App-level strings (buttons, error messages, system UI) are currently available in en, nl, and de only. Custom locales will show these strings in English as a fallback.
+</Note>
