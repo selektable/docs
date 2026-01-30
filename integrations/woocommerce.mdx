@@ -3,11 +3,11 @@ title: WooCommerce
 description: Integrate Selektable with your WooCommerce store
 ---
 
-# WooCommerce Integration
+# WooCommerce integration
 
 Selektable provides an official **WordPress plugin** for WooCommerce that handles embed script injection, product detection, variant image updates, and cart integration out of the box.
 
-## Option A: WordPress Plugin (Recommended)
+## Option A: WordPress plugin (recommended)
 
 The easiest way to integrate Selektable with WooCommerce is the official plugin.
 
@@ -39,11 +39,11 @@ The plugin automatically:
   Requires WordPress 6.9+ and WooCommerce 8.8.6+.
 </Note>
 
-## Option B: Manual Integration
+## Option B: manual integration
 
 If you prefer not to use the plugin, you can add the integration manually via your theme's `functions.php`.
 
-### 1. Add the Embed Script
+### 1. Add the embed script
 
 ```php
 // Set your widget ID and app URL
@@ -59,7 +59,7 @@ add_action('wp_footer', function() {
 });
 ```
 
-### 2. Add the Widget Button
+### 2. Add the widget button
 
 ```php
 // Add button after Add to Cart
@@ -96,7 +96,7 @@ add_action('woocommerce_after_add_to_cart_button', function() {
 });
 ```
 
-### 3. Handle Variation Changes (Optional)
+### 3. Handle variation changes (optional)
 
 ```html
 <script>
@@ -109,7 +109,7 @@ jQuery(function($) {
 </script>
 ```
 
-### 4. Cart Integration (Optional)
+### 4. Cart integration (optional)
 
 ```javascript
 // Example custom add-to-cart handler for WooCommerce
@@ -147,7 +147,7 @@ The SDK automatically detects WooCommerce product data from the page DOM, includ
 
 This means even without explicit `productId` in the `open()` call, the widget can often find the right product on WooCommerce pages.
 
-## Order Webhooks
+## Order webhooks
 
 To enable conversion tracking, configure a webhook in WooCommerce:
 

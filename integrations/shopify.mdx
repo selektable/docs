@@ -3,13 +3,13 @@ title: Shopify
 description: Integrate Selektable with your Shopify store
 ---
 
-# Shopify Integration
+# Shopify integration
 
 Integrate Selektable into your Shopify store by adding the embed script and widget button to your product template.
 
 ## Setup
 
-### 1. Add the Embed Script
+### 1. Add the embed script
 
 Add the script to your theme's `theme.liquid` file, before the closing `</body>` tag:
 
@@ -17,7 +17,7 @@ Add the script to your theme's `theme.liquid` file, before the closing `</body>`
 <script src="https://app.selektable.com/widgets/embed.js" async></script>
 ```
 
-### 2. Add the Widget Button
+### 2. Add the widget button
 
 Add the following to your product template (typically `sections/main-product.liquid` or similar):
 
@@ -72,7 +72,7 @@ document.getElementById('selektable-btn').addEventListener('click', function() {
 </script>
 ```
 
-### 3. Handle Variant Changes
+### 3. Handle variant changes
 
 Update the button data when the customer selects a different variant:
 
@@ -94,7 +94,7 @@ document.addEventListener('variant:changed', function(e) {
   The `variant:changed` event name depends on your theme. Some themes use `variantChange` or dispatch custom events. Check your theme's JavaScript for the correct event name.
 </Note>
 
-## Order Webhooks
+## Order webhooks
 
 To enable conversion tracking, set up an order webhook:
 
@@ -104,7 +104,7 @@ To enable conversion tracking, set up an order webhook:
    - **URL**: `https://app.selektable.com/api/webhooks/shopify/orders`
    - **Format**: JSON
 
-## Styling the Button
+## Styling the button
 
 Add CSS to match your theme:
 

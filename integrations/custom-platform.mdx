@@ -1,13 +1,13 @@
 ---
-title: Custom Platform
+title: Custom platform
 description: Integrate Selektable with any custom ecommerce platform
 ---
 
-# Custom Platform Integration
+# Custom platform integration
 
 For platforms other than WooCommerce or Shopify, use the generic JavaScript integration. This works with any website — whether it's built with Next.js, Nuxt, Ruby on Rails, Django, or plain HTML.
 
-## Quick Setup
+## Quick setup
 
 ```html
 <!-- 1. Add the embed script -->
@@ -49,7 +49,7 @@ function openWidget() {
 </script>
 ```
 
-## What You Need to Implement
+## What you need to implement
 
 ### Required
 
@@ -66,7 +66,7 @@ function openWidget() {
 | **Identity** | Call `Selektable.identify()` for logged-in users |
 | **Preloading** | Call `Selektable.preload()` for instant widget opening |
 
-## Order Webhook
+## Order webhook
 
 To track conversions, send a webhook when an order is placed:
 
@@ -92,7 +92,7 @@ Content-Type: application/json
 }
 ```
 
-## Server-Side Product Data
+## Server-side product data
 
 If your product data lives server-side, render it into the page and pass it to the SDK:
 
@@ -150,7 +150,7 @@ export default function ProductPage({ product }) {
 
 </CodeGroup>
 
-## Headless CMS / API-Driven
+## Headless CMS / API-driven
 
 For headless setups where product data is fetched client-side:
 
@@ -172,6 +172,6 @@ Selektable.open('widget_abc123', {
 });
 ```
 
-## Full Reference
+## Full reference
 
 For the complete list of options and methods, see the [SDK Reference](/sdk/overview).

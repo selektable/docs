@@ -1,9 +1,9 @@
 ---
-title: Product Options
+title: Product options
 description: Full reference for the ProductOptions object passed to Selektable.open()
 ---
 
-# Product Options
+# Product options
 
 The `ProductOptions` object is the second argument to `Selektable.open()`. It provides product data and cart callbacks to the widget.
 
@@ -34,7 +34,7 @@ interface ProductOptions {
 }
 ```
 
-## Product Information
+## Product information
 
 <ParamField path="productId" type="string | number">
   Unique identifier for the product. Used to track generations and conversions.
@@ -67,7 +67,7 @@ interface ProductOptions {
   URL of the product page. Used for sharing and navigation.
 </ParamField>
 
-## Variable Product Data
+## Variable product data
 
 These fields are primarily used for WooCommerce-style variable products where a single product has multiple variations (e.g., different colors/sizes).
 
@@ -116,7 +116,7 @@ These fields are primarily used for WooCommerce-style variable products where a 
   Whether the product is in stock.
 </ParamField>
 
-## Cart Callbacks
+## Cart callbacks
 
 <ParamField path="onAddToCart" type="function">
   Called when the customer clicks "Add to Cart" in the widget. See [Cart Integration](/guides/cart-integration) for details.
@@ -151,7 +151,7 @@ These fields are primarily used for WooCommerce-style variable products where a 
   Called when the customer clicks "Checkout" after a successful add-to-cart.
 </ParamField>
 
-## Product Context Resolution
+## Product context resolution
 
 The widget resolves product data in this priority order:
 

@@ -7,21 +7,21 @@ description: Configuring and managing Selektable widgets
 
 A **widget** is the visualization experience embedded on your product pages. Each store can have multiple widgets with different configurations.
 
-## Widget Types
+## Widget types
 
 | Type | Best For | Description |
 |------|----------|-------------|
 | **Room Visualizer** | Furniture, decor, wall art, rugs, lighting | Renders products into a room photo |
 | **Virtual Try-On** | Clothing, accessories, eyewear | Renders products onto a person photo |
 
-## Creating a Widget
+## Creating a widget
 
 1. Open your store in the Selektable dashboard
 2. Click **Add Widget**
 3. Choose a widget type and configure the options below
 4. Copy the widget ID from the embed instructions
 
-## Configuration Options
+## Configuration options
 
 ### Appearance
 
@@ -41,7 +41,7 @@ A **widget** is the visualization experience embedded on your product pages. Eac
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| **Custom Prompt Hint** | Additional context for the AI model (max 500 chars). Use this to describe your product category or style. | None |
+| **Custom Style Guidance** | Additional instructions to fine-tune AI image generation (max 500 chars). See [Custom style guidance](#custom-style-guidance) below. | None |
 | **Retention Hours** | How long generated images are stored (1-720 hours) | 24 |
 
 ### Features
@@ -58,17 +58,84 @@ A **widget** is the visualization experience embedded on your product pages. Eac
 |--------|-------------|
 | **WhatsApp** | Allow customers to share results via WhatsApp |
 
-## Multi-Product Mode
+## Multi-Product mode
 
 When enabled, customers can select multiple products to visualize together. This is useful for showing how items complement each other — for example, a sofa with a matching coffee table and rug.
 
 Configure the maximum number of products (2-5) in the widget settings.
 
-## Font Detection
+## Font detection
 
 The embed script automatically detects your site's heading and body fonts by inspecting the computed styles of `<h1>` and `<body>` elements. These are sent to the widget iframe so the UI matches your site's typography.
 
 To override this, set explicit fonts in the widget configuration.
+
+## Custom style guidance
+
+Custom style guidance lets you fine-tune how the AI generates visualizations for your widget. This is a free-text field (up to 500 characters) that gives the AI additional context about your products, brand aesthetic, or specific rendering instructions.
+
+You can set this in the dashboard under your widget's **Generation** settings.
+
+### When to use it
+
+Style guidance is most useful when:
+
+- Your products have a specific aesthetic that the AI should maintain (e.g., bridal, luxury, minimalist)
+- You need the AI to handle product images in a particular way (e.g., keep the person in the photo, preserve specific lighting)
+- Your product category benefits from extra context (e.g., "these are outdoor furniture items" or "these are children's clothing")
+
+### Writing effective guidance
+
+Be specific and descriptive. Tell the AI what to preserve, what style to aim for, and any constraints.
+
+<Tip>
+  Think of the guidance as a brief creative direction — you're telling the AI how you'd describe the ideal output to a designer.
+</Tip>
+
+**Example: bridal store (Virtual Try-On)**
+
+```
+The uploaded image contains a real person — always keep this person exactly
+as they appear (face, body, pose, skin tone). Make them appear in a natural
+position, arms down and elegant. Never replace them with a mannequin or model.
+
+Show the bridal garment on this specific person. Maintain elegant, soft bridal
+lighting with a clean, romantic aesthetic and use the location of the product
+(input) image but replace the product model.
+```
+
+**Example: modern furniture store (Room Visualizer)**
+
+```
+Modern minimalist furniture store. Use clean, well-lit interiors with neutral
+tones. Prefer Scandinavian-style room settings with natural light.
+```
+
+**Example: outdoor garden decor**
+
+```
+Outdoor garden and patio products. Place items in realistic outdoor settings
+with natural lighting. Prefer lush green gardens or well-maintained patios.
+```
+
+**Example: children's room decor**
+
+```
+Bright, playful children's room settings. Use soft, warm lighting and
+colorful but tasteful interiors. Keep the atmosphere fun and inviting.
+```
+
+### Tips for best results
+
+- **Be specific about what to preserve** — especially for Virtual Try-On, tell the AI to keep the person's appearance exactly as-is
+- **Describe the lighting and mood** — "soft bridal lighting" or "bright natural daylight" helps the AI match your brand
+- **Mention what to avoid** — "never replace the person with a mannequin" prevents common issues
+- **Keep it concise** — the field has a 500-character limit, so focus on the most impactful instructions
+- **Test and iterate** — try different guidance text and compare the generation results to find what works best for your products
+
+<Warning>
+  Custom style guidance affects all generations for that widget. If you sell different product categories that need different guidance, consider creating separate widgets for each category.
+</Warning>
 
 ## Preloading
 

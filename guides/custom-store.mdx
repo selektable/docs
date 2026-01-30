@@ -1,15 +1,15 @@
 ---
-title: Custom Store Setup
+title: Custom store setup
 description: Complete guide to setting up a custom store with Selektable
 ---
 
-# Custom Store Setup
+# Custom store setup
 
 A **custom store** lets you integrate Selektable with any ecommerce platform — whether you built it yourself, use a headless CMS, or run a platform we don't have a native integration for.
 
 Unlike WooCommerce or Shopify stores that connect via OAuth, custom stores are configured manually through the dashboard and integrated using the embed script.
 
-## Step 1: Create a Store
+## Step 1: Create a store
 
 1. Log in to the [Selektable dashboard](https://app.selektable.com)
 2. Navigate to your organization
@@ -25,7 +25,7 @@ Unlike WooCommerce or Shopify stores that connect via OAuth, custom stores are c
 
 5. Click **Create Store**
 
-## Step 2: Create a Widget
+## Step 2: Create a widget
 
 Each store can have multiple widgets. You need at least one to get started.
 
@@ -37,14 +37,14 @@ Each store can have multiple widgets. You need at least one to get started.
 |-------|-------------|
 | **Name** | Internal name (e.g., "Room Visualizer - Living Room") |
 | **Type** | `room-visualizer` or `virtual-try-on` |
-| **Custom Prompt Hint** | Optional context for the AI (e.g., "This is a modern furniture store") |
+| **Custom Style Guidance** | Optional instructions to fine-tune AI generation. See [Custom style guidance](/guides/widgets#custom-style-guidance). |
 | **Accent Color** | Primary button color in the widget |
 | **Retention Hours** | How long generated images are kept (1-720 hours, default 24) |
 
 4. Click **Create Widget**
 5. Copy the **Widget ID** (e.g., `widget_abc123`)
 
-## Step 3: Add the Embed Script
+## Step 3: Add the embed script
 
 Add the Selektable script to every page where you want the widget available. Place it before the closing `</body>` tag:
 
@@ -56,9 +56,9 @@ Add the Selektable script to every page where you want the widget available. Pla
   The script is lightweight and loads asynchronously, so it won't block your page rendering.
 </Tip>
 
-## Step 4: Add the Widget Button
+## Step 4: Add the widget button
 
-### Option A: JavaScript API (Recommended)
+### Option A: JavaScript API (recommended)
 
 Call `Selektable.open()` with your product data:
 
@@ -89,7 +89,7 @@ Call `Selektable.open()` with your product data:
 </script>
 ```
 
-### Option B: Data Attributes
+### Option B: data attributes
 
 Use HTML data attributes for declarative setup:
 
@@ -114,7 +114,7 @@ Use HTML data attributes for declarative setup:
   When using data attributes, `Selektable.discover()` registers the elements but doesn't create iframes until `Selektable.open()` is called. You still need to call `open()` from a click handler or trigger.
 </Note>
 
-## Step 5: Add Cart Integration (Optional)
+## Step 5: Add cart integration (optional)
 
 If you want customers to add products to their cart from the visualization result screen, provide cart callbacks:
 
@@ -161,7 +161,7 @@ Selektable.open('widget_abc123', {
   If cart is enabled on your widget but you don't provide `onAddToCart`, the widget will show an error when the customer tries to add to cart.
 </Warning>
 
-## Step 6: Set Up Order Webhooks (Optional)
+## Step 6: Set up order webhooks (optional)
 
 To track conversions, send order data to Selektable when a purchase is made:
 
@@ -189,7 +189,7 @@ Content-Type: application/json
 
 This enables conversion attribution in your analytics dashboard.
 
-## Step 7: Identify Customers (Optional)
+## Step 7: Identify customers (optional)
 
 If your site has user accounts, associate the visitor with their user ID for better tracking:
 
@@ -203,7 +203,7 @@ Selektable.identify('user-123', {
 
 See [Identity Tracking](/guides/identity-tracking) for details.
 
-## Full Example
+## Full example
 
 Here's a complete product page integration:
 

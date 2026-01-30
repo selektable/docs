@@ -1,11 +1,11 @@
 ---
-title: Advanced Examples
+title: Advanced examples
 description: Advanced integration patterns for the Selektable SDK
 ---
 
-# Advanced Examples
+# Advanced examples
 
-## Conditional Widget Loading
+## Conditional widget loading
 
 Only load the widget on product pages:
 
@@ -21,7 +21,7 @@ Only load the widget on product pages:
 </script>
 ```
 
-## Multiple Widget Types on One Page
+## Multiple widget types on one page
 
 Use different widgets for different product categories:
 
@@ -41,7 +41,7 @@ function openVisualizer(product) {
 }
 ```
 
-## React Integration
+## React integration
 
 ```jsx
 import { useCallback } from 'react';
@@ -76,7 +76,7 @@ function ProductPage({ product }) {
 }
 ```
 
-## Vue Integration
+## Vue integration
 
 ```vue
 <template>
@@ -113,7 +113,7 @@ function openWidget() {
 </script>
 ```
 
-## Svelte Integration
+## Svelte integration
 
 ```svelte
 <script>
@@ -148,7 +148,7 @@ function openWidget() {
 <button onclick={openWidget}>View in your room</button>
 ```
 
-## Login/Logout Identity Flow
+## Login/Logout identity flow
 
 ```javascript
 // On login
@@ -176,7 +176,7 @@ window.addEventListener('load', function () {
 });
 ```
 
-## Listening for Widget Close
+## Listening for widget close
 
 Monitor when customers close the widget (e.g., for analytics):
 
@@ -195,7 +195,7 @@ window.addEventListener('message', function (event) {
 });
 ```
 
-## Custom Visitor ID from Your Analytics
+## Custom visitor ID from your analytics
 
 If you already have a visitor tracking system (e.g., Segment, Amplitude):
 

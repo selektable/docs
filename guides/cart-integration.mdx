@@ -1,13 +1,13 @@
 ---
-title: Cart Integration
+title: Cart integration
 description: Let customers add products to their cart from the visualization
 ---
 
-# Cart Integration
+# Cart integration
 
 When cart integration is enabled on a widget, customers can add products to their shopping cart directly from the visualization result screen. You implement the actual cart logic through callbacks.
 
-## How It Works
+## How it works
 
 1. The customer generates a visualization and sees the result
 2. They click **Add to Cart** in the widget
@@ -15,7 +15,7 @@ When cart integration is enabled on a widget, customers can add products to thei
 4. Your `onAddToCart` callback handles the cart operation
 5. The widget shows a success or error state based on your response
 
-## Enabling Cart Integration
+## Enabling cart integration
 
 First, enable cart in the widget configuration in the dashboard. Then provide the callbacks when opening the widget:
 
@@ -40,7 +40,7 @@ Selektable.open('widget_abc123', {
 });
 ```
 
-## Callback Reference
+## Callback reference
 
 ### `onAddToCart(product, quantity, variation)`
 
@@ -94,7 +94,7 @@ Called when the customer clicks "Checkout" after adding to cart. Navigate them t
 
 ## Examples
 
-### Simple REST API Cart
+### Simple REST API cart
 
 ```javascript
 onAddToCart: async function (product, quantity) {
@@ -115,7 +115,7 @@ onAddToCart: async function (product, quantity) {
 }
 ```
 
-### WooCommerce AJAX Cart
+### WooCommerce AJAX cart
 
 ```javascript
 onAddToCart: async function (product, quantity, variation) {
@@ -138,7 +138,7 @@ onAddToCart: async function (product, quantity, variation) {
 }
 ```
 
-### Shopify AJAX Cart
+### Shopify AJAX cart
 
 ```javascript
 onAddToCart: async function (product, quantity) {
@@ -155,7 +155,7 @@ onAddToCart: async function (product, quantity) {
 }
 ```
 
-## Error Handling
+## Error handling
 
 If you don't provide `onAddToCart` but cart is enabled on the widget, the customer will see a `CART_HANDLER_NOT_CONFIGURED` error when they try to add to cart.
 

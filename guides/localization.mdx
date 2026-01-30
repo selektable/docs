@@ -7,7 +7,7 @@ description: Multi-language support for Selektable widgets
 
 Selektable widgets support multiple languages out of the box, with the ability to customize strings per locale.
 
-## Supported Languages
+## Supported languages
 
 | Locale | Language |
 |--------|----------|
@@ -15,7 +15,7 @@ Selektable widgets support multiple languages out of the box, with the ability t
 | `nl` | Dutch |
 | `de` | German |
 
-## How Locale Detection Works
+## How locale detection works
 
 The widget determines the active locale in this order:
 
@@ -23,7 +23,7 @@ The widget determines the active locale in this order:
 2. **Widget configuration** — The default locale set in the widget config
 3. **Fallback** — English (`en`)
 
-## Weglot Integration
+## Weglot integration
 
 If your site uses [Weglot](https://weglot.com) for translation, the widget automatically:
 
@@ -32,11 +32,11 @@ If your site uses [Weglot](https://weglot.com) for translation, the widget autom
 
 No configuration needed — the embed script handles this automatically.
 
-## Custom Locale Strings
+## Custom locale strings
 
 You can customize the text shown in widgets through the widget configuration in the dashboard. Each locale supports these categories of strings:
 
-### Variant Strings
+### Variant strings
 
 Text specific to the widget type (room visualizer or virtual try-on):
 
@@ -44,16 +44,16 @@ Text specific to the widget type (room visualizer or virtual try-on):
 - Generation loading text
 - Result heading
 
-### Marketing Strings
+### Marketing strings
 
 - Marketing consent checkbox label
 - Post-generation CTA text
 
-### Integration Strings
+### Integration strings
 
 - WhatsApp share message text
 
-## Adding a Custom Locale
+## Adding a custom locale
 
 To support a language beyond en/nl/de, configure custom locale strings in the widget settings. The widget will use your custom strings when the detected locale matches.
 

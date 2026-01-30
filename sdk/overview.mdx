@@ -1,13 +1,13 @@
 ---
-title: SDK Overview
+title: SDK overview
 description: Introduction to the Selektable client SDK
 ---
 
-# SDK Overview
+# SDK overview
 
 The Selektable client SDK is a lightweight JavaScript library that runs on your product pages. It manages the widget lifecycle, product context, identity tracking, and communication between your page and the widget iframe.
 
-## Global Object
+## Global object
 
 After the embed script loads, it exposes a global `window.Selektable` object with the following methods:
 
@@ -22,7 +22,7 @@ After the embed script loads, it exposes a global `window.Selektable` object wit
 | [`getIdentity()`](/sdk/identity#getidentity) | Get current identity object |
 | [`setVisitorId(id)`](/sdk/identity#setvisitorid) | Manually set the visitor ID |
 
-## How It Works
+## How it works
 
 The SDK operates as an [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) that:
 
@@ -32,7 +32,7 @@ The SDK operates as an [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/
 4. **Handles cart operations** — proxies add-to-cart requests between the widget and your callbacks
 5. **Detects context** — auto-detects product info, fonts, and translation service language
 
-## Widget States
+## Widget states
 
 Each widget instance goes through these states:
 
@@ -51,7 +51,7 @@ idle → loading → ready → open
 
 Calling `preload()` moves the widget from `idle` to `ready` without showing it. Calling `open()` on an already `ready` widget shows it instantly with no loading spinner.
 
-## Browser Support
+## Browser support
 
 The SDK uses:
 - `localStorage` and `sessionStorage` for identity

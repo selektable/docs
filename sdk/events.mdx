@@ -11,7 +11,7 @@ The Selektable SDK communicates with the widget iframe using the browser's `post
   You don't need to handle these events directly — the SDK manages them automatically. This reference is for advanced integrations or debugging.
 </Note>
 
-## Parent → Widget Messages
+## Parent → widget messages
 
 These are sent from your page (via the SDK) to the widget iframe:
 
@@ -25,7 +25,7 @@ These are sent from your page (via the SDK) to the widget iframe:
 | `parent:cart-result` | Result of `onAddToCart` callback | After cart operation completes |
 | `parent:font-detected` | Detected heading/body fonts from page | Widget becomes ready |
 
-## Widget → Parent Messages
+## Widget → parent messages
 
 These are sent from the widget iframe to your page:
 
@@ -38,7 +38,7 @@ These are sent from the widget iframe to your page:
 | `widget:view-cart` | Customer clicked "View Cart" | Calls your `onViewCart` callback |
 | `widget:checkout` | Customer clicked "Checkout" | Calls your `onCheckout` callback |
 
-## Message Format
+## Message format
 
 All messages follow this structure:
 

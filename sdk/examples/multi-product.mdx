@@ -1,9 +1,9 @@
 ---
-title: Multi-Product Visualization
+title: Multi-Product visualization
 description: Visualize multiple products together in a single scene
 ---
 
-# Multi-Product Visualization
+# Multi-Product visualization
 
 When multi-product mode is enabled on a widget, customers can select 2-5 products to visualize together. This is useful for showing how items complement each other — for example, a sofa with a matching coffee table and rug.
 
@@ -11,14 +11,14 @@ When multi-product mode is enabled on a widget, customers can select 2-5 product
   Multi-product mode is configured in the widget settings in the dashboard, not through the SDK. The SDK passes individual product context; the widget handles multi-product selection in its UI.
 </Note>
 
-## How It Works
+## How it works
 
 1. Enable **Multi-Product** in your widget configuration (set max products: 2-5)
 2. The customer opens the widget and uploads a photo
 3. The widget UI lets them add additional products before generating
 4. All selected products are rendered together in the scene
 
-## Providing Product Data
+## Providing product data
 
 Even with multi-product enabled, you open the widget with a single product. The customer adds more products through the widget UI:
 
@@ -35,7 +35,7 @@ Selektable.open('widget_room', {
 
 The widget will show the initial product and provide an interface for the customer to browse and add more products from your store.
 
-## Cart Integration with Multi-Product
+## Cart integration with multi-product
 
 When multi-product is enabled and the customer adds to cart, the `onAddToCart` callback is called once per product:
 
