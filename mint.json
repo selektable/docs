@@ -4,8 +4,8 @@
   "description": "AI-powered product visualization for ecommerce. Let customers see products in their space before they buy.",
   "colors": {
     "primary": "#171717",
-    "light": "#737373",
-    "dark": "#FAFAFA"
+    "light": "#171717",
+    "dark": "#171717"
   },
   "logo": {
     "light": "/logo/light.svg",
