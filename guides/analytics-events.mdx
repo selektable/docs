@@ -1,0 +1,342 @@
+---
+title: Analytics events
+description: Listen to widget events to feed your own analytics tools
+---
+
+# Analytics events
+
+The Selektable widget emits events to the host page at key moments in the customer journey. You can listen to these events to send data to your own analytics tools like Google Analytics, Meta Pixel, Mixpanel, Segment, or any other platform.
+
+## Available events
+
+| Event | Description | Payload |
+|-------|-------------|---------|
+| `widget:ready` | Widget iframe has loaded and is ready | `storeId` |
+| `widget:modal-close` | Customer closed the widget | `storeId` |
+| `widget:error` | An error occurred in the widget | `storeId`, `error` |
+| `widget:add-to-cart` | Customer clicked "Add to Cart" | `storeId`, `product`, `quantity`, `variation` |
+| `widget:view-cart` | Customer clicked "View Cart" | `storeId` |
+| `widget:checkout` | Customer clicked "Checkout" | `storeId` |
+
+## Listening to events
+
+The widget communicates with the host page using the browser's `postMessage` API. Add a listener on `window` to receive events:
+
+```javascript
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      console.log('Widget loaded');
+      break;
+    case 'widget:modal-close':
+      console.log('Widget closed');
+      break;
+    case 'widget:error':
+      console.error('Widget error:', data.error);
+      break;
+    case 'widget:add-to-cart':
+      console.log('Add to cart:', data.product, data.quantity);
+      break;
+    case 'widget:view-cart':
+      console.log('View cart clicked');
+      break;
+    case 'widget:checkout':
+      console.log('Checkout clicked');
+      break;
+  }
+});
+```
+
+## Event lifecycle
+
+Events fire in the following order during a typical customer interaction:
+
+```
+Selektable.open() called
+  └─ widget:ready
+       └─ Customer uploads photo and generates visualization
+            ├─ (on error) widget:error
+            └─ (on success) Customer sees result
+                 ├─ widget:add-to-cart  (clicks "Add to Cart")
+                 ├─ widget:view-cart    (clicks "View Cart")
+                 ├─ widget:checkout     (clicks "Checkout")
+                 └─ widget:modal-close  (closes the widget)
+```
+
+## Event payloads
+
+### widget:ready
+
+Fires when the widget iframe has finished loading and is ready for interaction.
+
+```javascript
+{
+  type: 'widget:ready',
+  storeId: 'store_xxx'
+}
+```
+
+### widget:modal-close
+
+Fires when the customer closes the widget (back button, close button, or clicking outside).
+
+```javascript
+{
+  type: 'widget:modal-close',
+  storeId: 'store_xxx'
+}
+```
+
+### widget:error
+
+Fires when an error occurs in the widget (file too large, generation failed, network error, etc.).
+
+```javascript
+{
+  type: 'widget:error',
+  storeId: 'store_xxx',
+  error: 'File size exceeds the maximum allowed'
+}
+```
+
+### widget:add-to-cart
+
+Fires when the customer clicks "Add to Cart" on the visualization result screen.
+
+```javascript
+{
+  type: 'widget:add-to-cart',
+  storeId: 'store_xxx',
+  product: {
+    id: 123,
+    title: 'Modern Blue Sofa',
+    price: '899.00',
+    image: 'https://example.com/sofa.jpg'
+  },
+  quantity: 1,
+  variation: [
+    { attribute: 'color', value: 'blue' }
+  ]
+}
+```
+
+### widget:view-cart
+
+Fires when the customer clicks the "View Cart" button.
+
+```javascript
+{
+  type: 'widget:view-cart',
+  storeId: 'store_xxx'
+}
+```
+
+### widget:checkout
+
+Fires when the customer clicks the "Checkout" button.
+
+```javascript
+{
+  type: 'widget:checkout',
+  storeId: 'store_xxx'
+}
+```
+
+## Integration examples
+
+### Google Analytics 4
+
+<CodeGroup>
+
+```javascript gtag.js
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      gtag('event', 'selektable_widget_open');
+      break;
+    case 'widget:modal-close':
+      gtag('event', 'selektable_widget_close');
+      break;
+    case 'widget:add-to-cart':
+      gtag('event', 'selektable_add_to_cart', {
+        item_id: data.product.id,
+        item_name: data.product.title,
+        quantity: data.quantity
+      });
+      break;
+    case 'widget:checkout':
+      gtag('event', 'selektable_checkout');
+      break;
+  }
+});
+```
+
+```javascript Google Tag Manager (dataLayer)
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      dataLayer.push({ event: 'selektable_widget_open' });
+      break;
+    case 'widget:modal-close':
+      dataLayer.push({ event: 'selektable_widget_close' });
+      break;
+    case 'widget:add-to-cart':
+      dataLayer.push({
+        event: 'selektable_add_to_cart',
+        selektable_product_id: data.product.id,
+        selektable_product_name: data.product.title,
+        selektable_quantity: data.quantity
+      });
+      break;
+    case 'widget:checkout':
+      dataLayer.push({ event: 'selektable_checkout' });
+      break;
+  }
+});
+```
+
+</CodeGroup>
+
+### Meta Pixel
+
+```javascript
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      fbq('trackCustom', 'SelektableWidgetOpen');
+      break;
+    case 'widget:add-to-cart':
+      fbq('track', 'AddToCart', {
+        content_ids: [data.product.id],
+        content_name: data.product.title,
+        content_type: 'product',
+        value: parseFloat(data.product.price) || 0,
+        currency: 'USD'
+      });
+      break;
+    case 'widget:checkout':
+      fbq('track', 'InitiateCheckout');
+      break;
+  }
+});
+```
+
+### Segment
+
+```javascript
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      analytics.track('Selektable Widget Opened');
+      break;
+    case 'widget:modal-close':
+      analytics.track('Selektable Widget Closed');
+      break;
+    case 'widget:add-to-cart':
+      analytics.track('Product Added', {
+        product_id: data.product.id,
+        name: data.product.title,
+        quantity: data.quantity,
+        source: 'selektable_widget'
+      });
+      break;
+    case 'widget:checkout':
+      analytics.track('Checkout Started', {
+        source: 'selektable_widget'
+      });
+      break;
+  }
+});
+```
+
+### Mixpanel
+
+```javascript
+window.addEventListener('message', function (event) {
+  var data = event.data;
+  if (!data || !data.type) return;
+
+  switch (data.type) {
+    case 'widget:ready':
+      mixpanel.track('Selektable Widget Opened');
+      break;
+    case 'widget:modal-close':
+      mixpanel.track('Selektable Widget Closed');
+      break;
+    case 'widget:error':
+      mixpanel.track('Selektable Widget Error', { error: data.error });
+      break;
+    case 'widget:add-to-cart':
+      mixpanel.track('Selektable Add to Cart', {
+        product_id: data.product.id,
+        product_name: data.product.title,
+        quantity: data.quantity
+      });
+      break;
+  }
+});
+```
+
+## Full example
+
+A product page that tracks all widget events to Google Analytics 4:
+
+```html
+<button onclick="openWidget()">View in your room</button>
+
+<script src="https://app.selektable.com/widgets/embed.js" async></script>
+
+<script>
+  function openWidget() {
+    Selektable.open('widget_abc123', {
+      productId: 'prod-456',
+      productTitle: 'Modern Blue Sofa',
+      productImage: 'https://myshop.com/images/sofa.jpg'
+    });
+  }
+
+  // Track all widget events
+  window.addEventListener('message', function (event) {
+    var data = event.data;
+    if (!data || !data.type || data.type.indexOf('widget:') !== 0) return;
+
+    // Send every widget event to GA4
+    gtag('event', 'selektable_' + data.type.replace('widget:', ''), {
+      store_id: data.storeId,
+      product_id: data.product ? data.product.id : undefined,
+      product_name: data.product ? data.product.title : undefined,
+      error_message: data.error || undefined
+    });
+  });
+</script>
+```
+
+<Note>
+  The `postMessage` listener receives messages from all iframes on the page, not just Selektable. Always check that `data.type` starts with `widget:` to avoid handling unrelated messages.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Conversion tracking" icon="chart-line" href="/guides/conversion-tracking">
+    Track purchases and leads to measure widget impact
+  </Card>
+  <Card title="Identity tracking" icon="user" href="/guides/identity-tracking">
+    Associate events with logged-in customer accounts
+  </Card>
+</CardGroup>

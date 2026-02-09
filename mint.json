@@ -49,6 +49,8 @@
         "guides/product-image",
         "guides/cart-integration",
         "guides/identity-tracking",
+        "guides/conversion-tracking",
+        "guides/analytics-events",
         "guides/localization"
       ]
     },
