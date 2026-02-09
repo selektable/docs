@@ -13,88 +13,58 @@ For WooCommerce and Shopify stores, conversion tracking is handled automatically
 
 1. The embed script assigns each visitor a persistent **visitor ID** (stored in `localStorage`) and a **session ID** (stored in `sessionStorage`)
 2. When a customer generates a visualization, it's recorded with their visitor and session IDs
-3. When a conversion happens (purchase, form submission, etc.), you send a webhook to Selektable that includes the same IDs
+3. When a conversion happens (purchase, form submission, etc.), your server sends a webhook to Selektable that includes the same IDs
 4. Selektable's attribution engine matches the conversion to any recent visualizations within the attribution window (default: 7 days)
 
 ## Prerequisites
 
-- The Selektable embed script must be loaded on your site, including the thank you / confirmation page
+- The Selektable embed script must be loaded on your site, including pages with forms or checkout
 - You need your **store ID**, **organization ID**, and **API key** from the [dashboard](https://app.selektable.com)
 
 API keys start with `sel_` and are used as a Bearer token in the `Authorization` header of every webhook request.
 
 <Warning>
-  Your API key is a secret. If you send the webhook from client-side JavaScript, the key will be visible in browser dev tools. For production use, prefer sending the webhook from your server where the key can be kept private.
+  Your API key is a secret. Never expose it in client-side JavaScript. The webhook must always be sent from your server.
 </Warning>
 
-<Note>
-  The embed script must be present on the thank you page so that the visitor and session IDs are accessible. If you load the script site-wide (recommended), this is already covered.
-</Note>
+## How tracking IDs reach your server
+
+`Selektable.getIdentity()` is a **client-side browser API** that reads from `localStorage` and `sessionStorage`. It is not available on your server.
+
+To send the webhook from your backend, you need to pass the tracking IDs from the browser through your form using hidden fields. Add these to any form where you want to track conversions:
+
+```html
+<form action="/your-endpoint" method="POST">
+  <!-- Your form fields here -->
+
+  <!-- Hidden tracking fields (populated by JavaScript) -->
+  <input type="hidden" name="visitorId" id="sel-visitor-id" />
+  <input type="hidden" name="sessionId" id="sel-session-id" />
+
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  var identity = Selektable.getIdentity();
+  document.getElementById('sel-visitor-id').value = identity.visitorId;
+  document.getElementById('sel-session-id').value = identity.sessionId;
+</script>
+```
+
+Your server then reads `visitorId` and `sessionId` from the form submission and includes them in the webhook payload.
 
 ## Ecommerce order tracking
 
-Track purchases on your order confirmation page by sending the order details along with the visitor's tracking IDs.
+Track purchases by sending the order details along with the visitor's tracking IDs from your server.
 
-### Step 1: Capture tracking IDs on the client
+**Step 1:** Add hidden tracking fields to your checkout form (see above).
 
-`Selektable.getIdentity()` is a **client-side browser API** -- it reads from `localStorage` and `sessionStorage`, so it is only available in JavaScript running on your page, not on your server.
-
-On your thank you page, read the visitor and session IDs from the embed script:
-
-```javascript
-const identity = Selektable.getIdentity();
-// identity.visitorId  - persistent browser ID
-// identity.sessionId  - current session ID
-```
-
-If you plan to send the webhook from your server, you need to pass these IDs from the browser to your backend first (e.g., via hidden form fields, a fetch call, or query parameters). See the server-side examples below.
-
-### Step 2: Send the order webhook
-
-Send a `POST` request to the conversion webhook with the order data and tracking IDs.
+**Step 2:** When the order is placed, send the webhook from your server.
 
 <CodeGroup>
 
-```javascript Client-side (thank you page)
-// On your order confirmation page
-const identity = Selektable.getIdentity();
-
-fetch('https://app.selektable.com/api/webhooks/orders', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer sel_your_api_key'
-  },
-  body: JSON.stringify({
-    orderId: 'order-789',          // Your order ID
-    storeId: 'store_xxx',          // From dashboard
-    organizationId: 'org_xxx',     // From dashboard
-    visitorId: identity.visitorId,
-    sessionId: identity.sessionId,
-    totalCents: 89900,             // Total in cents
-    currency: 'EUR',
-    platform: 'custom',
-    status: 'completed',
-    orderCreatedAt: new Date().toISOString(),
-    items: [
-      {
-        productId: 'prod-456',
-        quantity: 1,
-        priceCents: 89900,
-        totalCents: 89900
-      }
-    ]
-  })
-});
-```
-
-```javascript Server-side (Node.js)
-// Selektable.getIdentity() is NOT available on the server.
-// The client must send visitorId and sessionId to your backend
-// (e.g., via hidden form fields or a fetch call during checkout).
-
+```javascript Node.js
 app.post('/checkout/complete', async (req, res) => {
-  // visitorId and sessionId were passed from the client
   const { visitorId, sessionId, order } = req.body;
 
   await fetch('https://app.selektable.com/api/webhooks/orders', {
@@ -128,8 +98,6 @@ app.post('/checkout/complete', async (req, res) => {
 ```
 
 ```php PHP
-// Selektable.getIdentity() is NOT available on the server.
-// These values must be passed from the client (e.g., hidden form fields).
 $visitor_id = $_POST['visitorId'];
 $session_id = $_POST['sessionId'];
 
@@ -168,179 +136,33 @@ curl_close($ch);
 
 </CodeGroup>
 
-<Tip>
-  For the server-side approach, add hidden fields to your checkout form to pass the tracking IDs to your backend:
-
-  ```html
-  <form action="/checkout/complete" method="POST">
-    <!-- Your checkout fields -->
-    <input type="hidden" name="visitorId" id="visitorId" />
-    <input type="hidden" name="sessionId" id="sessionId" />
-    <button type="submit">Place order</button>
-  </form>
-
-  <script>
-    var identity = Selektable.getIdentity();
-    document.getElementById('visitorId').value = identity.visitorId;
-    document.getElementById('sessionId').value = identity.sessionId;
-  </script>
-  ```
-</Tip>
-
 <Warning>
   The `productId` in your items should match the `productId` you pass to `Selektable.open()` on your product pages. This is how Selektable links a purchase to a specific product visualization.
 </Warning>
-
-### Full example: order confirmation page
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Order confirmed - My Shop</title>
-</head>
-<body>
-  <h1>Thank you for your order!</h1>
-  <p>Order #<span id="order-id">ORD-12345</span> has been confirmed.</p>
-
-  <!-- Load the embed script (same as on product pages) -->
-  <script src="https://app.selektable.com/widgets/embed.js" async></script>
-
-  <script>
-    // Your order data (rendered server-side into the page)
-    var orderData = {
-      orderId: 'ORD-12345',
-      totalCents: 89900,
-      currency: 'EUR',
-      items: [
-        { productId: 'prod-456', quantity: 1, priceCents: 89900, totalCents: 89900 }
-      ]
-    };
-
-    // Wait for the embed script to load, then send the conversion
-    function trackConversion() {
-      var identity = Selektable.getIdentity();
-
-      fetch('https://app.selektable.com/api/webhooks/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sel_your_api_key'
-        },
-        body: JSON.stringify({
-          orderId: orderData.orderId,
-          storeId: 'store_xxx',
-          organizationId: 'org_xxx',
-          visitorId: identity.visitorId,
-          sessionId: identity.sessionId,
-          totalCents: orderData.totalCents,
-          currency: orderData.currency,
-          platform: 'custom',
-          status: 'completed',
-          orderCreatedAt: new Date().toISOString(),
-          items: orderData.items
-        })
-      });
-    }
-
-    // The embed script loads async, so wait for it
-    if (window.Selektable) {
-      trackConversion();
-    } else {
-      document.querySelector('script[src*="selektable"]')
-        .addEventListener('load', trackConversion);
-    }
-  </script>
-</body>
-</html>
-```
 
 ## Lead gen / appointment tracking
 
 If your site uses a contact form, appointment booking, or any non-ecommerce conversion, you can track form submissions as conversions. Set `totalCents` to `0` and pass an empty `items` array.
 
-There are two approaches: fire the webhook directly from the thank you page (client-side), or pass the tracking IDs through your form and send the webhook from your server.
-
-### Option A: Client-side (thank you page)
-
-Add this script to the page the customer sees after submitting the form. The embed script must be loaded on this page so that `Selektable.getIdentity()` can read the tracking IDs from the browser.
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Appointment confirmed</title>
-</head>
-<body>
-  <h1>Thank you!</h1>
-  <p>Your appointment has been booked. We'll be in touch shortly.</p>
-
-  <!-- Load the embed script (same as on product pages) -->
-  <script src="https://app.selektable.com/widgets/embed.js" async></script>
-
-  <script>
-    function trackConversion() {
-      var identity = Selektable.getIdentity();
-
-      fetch('https://app.selektable.com/api/webhooks/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sel_your_api_key'
-        },
-        body: JSON.stringify({
-          orderId: 'lead-' + Date.now(),
-          storeId: 'store_xxx',
-          organizationId: 'org_xxx',
-          visitorId: identity.visitorId,
-          sessionId: identity.sessionId,
-          totalCents: 0,
-          currency: 'USD',
-          platform: 'custom',
-          status: 'completed',
-          orderCreatedAt: new Date().toISOString(),
-          items: []
-        })
-      });
-    }
-
-    // Wait for the embed script to load
-    if (window.Selektable) {
-      trackConversion();
-    } else {
-      document.querySelector('script[src*="selektable"]')
-        .addEventListener('load', trackConversion);
-    }
-  </script>
-</body>
-</html>
-```
-
-### Option B: Server-side
-
-`Selektable.getIdentity()` is a browser API and is **not available on your server**. To send the webhook from your backend, you need to pass the tracking IDs from the browser through your form using hidden fields.
-
-**Step 1:** Add hidden fields to your form that capture the tracking IDs before submission.
+**Step 1:** Add hidden tracking fields to your form.
 
 ```html
 <form action="/appointment/book" method="POST">
-  <!-- Your form fields -->
   <input type="text" name="name" placeholder="Name" />
   <input type="email" name="email" placeholder="Email" />
   <input type="tel" name="phone" placeholder="Phone" />
 
   <!-- Hidden tracking fields (populated by JavaScript) -->
-  <input type="hidden" name="visitorId" id="visitorId" />
-  <input type="hidden" name="sessionId" id="sessionId" />
+  <input type="hidden" name="visitorId" id="sel-visitor-id" />
+  <input type="hidden" name="sessionId" id="sel-session-id" />
 
   <button type="submit">Book appointment</button>
 </form>
 
 <script>
-  // Populate hidden fields when the page loads
   var identity = Selektable.getIdentity();
-  document.getElementById('visitorId').value = identity.visitorId;
-  document.getElementById('sessionId').value = identity.sessionId;
+  document.getElementById('sel-visitor-id').value = identity.visitorId;
+  document.getElementById('sel-session-id').value = identity.sessionId;
 </script>
 ```
 
@@ -430,8 +252,8 @@ Content-Type: application/json
 | `orderId` | `string` | Yes | Unique identifier for this conversion (order ID, form submission ID, etc.) |
 | `storeId` | `string` | Yes | Your Selektable store ID |
 | `organizationId` | `string` | Yes | Your Selektable organization ID |
-| `visitorId` | `string` | Yes | From `Selektable.getIdentity().visitorId` (client-side only) |
-| `sessionId` | `string` | Yes | From `Selektable.getIdentity().sessionId` (client-side only) |
+| `visitorId` | `string` | Yes | From `Selektable.getIdentity().visitorId` on the client, passed to your server via hidden form fields |
+| `sessionId` | `string` | Yes | From `Selektable.getIdentity().sessionId` on the client, passed to your server via hidden form fields |
 | `totalCents` | `integer` | Yes | Order total in cents, or `0` for lead gen |
 | `currency` | `string` | Yes | 3-letter currency code (e.g., `USD`, `EUR`) |
 | `platform` | `string` | Yes | Must be `"custom"` |
@@ -470,18 +292,15 @@ You'll see:
   <Accordion title="Conversions aren't showing in the dashboard">
     Verify that:
     - The `Authorization` header includes a valid API key.
-    - The `visitorId` and `sessionId` are not empty. Log `Selektable.getIdentity()` on the thank you page to check.
+    - The `visitorId` and `sessionId` are not empty. Log `Selektable.getIdentity()` on the client to check the values before form submission.
     - The `storeId` and `organizationId` match your dashboard values.
-    - The webhook returns `{ "success": true }`. Check your browser's network tab for errors.
+    - The webhook returns `{ "success": true }`.
   </Accordion>
   <Accordion title="Visitor ID is different on the thank you page">
-    The visitor ID is stored in `localStorage` on the same domain. If your form redirects to a different domain (e.g., a third-party payment page or booking tool), the visitor ID won't carry over. Make sure the thank you page is on the same domain as your product pages.
+    The visitor ID is stored in `localStorage` on the same domain. If your form redirects to a different domain (e.g., a third-party payment page or booking tool), the visitor ID won't carry over. Make sure the form page is on the same domain as your product pages.
   </Accordion>
   <Accordion title="Session ID is empty after redirect">
     The session ID uses `sessionStorage`, which resets when a new tab opens. If your checkout or form flow opens a new tab or window, the session ID will be different. The visitor ID (which persists across sessions) is more reliable for attribution in these cases.
-  </Accordion>
-  <Accordion title="Embed script not loaded when trackConversion runs">
-    The embed script loads asynchronously. Always check for `window.Selektable` before calling `getIdentity()`, and fall back to listening for the script's `load` event. See the full examples above.
   </Accordion>
 </AccordionGroup>
 
