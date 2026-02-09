@@ -29,7 +29,9 @@ For WooCommerce and Shopify stores, conversion tracking is handled automatically
 
 Track purchases on your order confirmation page by sending the order details along with the visitor's tracking IDs.
 
-### Step 1: Capture tracking IDs
+### Step 1: Capture tracking IDs on the client
+
+`Selektable.getIdentity()` is a **client-side browser API** -- it reads from `localStorage` and `sessionStorage`, so it is only available in JavaScript running on your page, not on your server.
 
 On your thank you page, read the visitor and session IDs from the embed script:
 
@@ -39,9 +41,11 @@ const identity = Selektable.getIdentity();
 // identity.sessionId  - current session ID
 ```
 
+If you plan to send the webhook from your server, you need to pass these IDs from the browser to your backend first (e.g., via hidden form fields, a fetch call, or query parameters). See the server-side examples below.
+
 ### Step 2: Send the order webhook
 
-Send a `POST` request to the conversion webhook with the order data and tracking IDs. This should be done server-side for reliability, but can also be done client-side.
+Send a `POST` request to the conversion webhook with the order data and tracking IDs.
 
 <CodeGroup>
 
@@ -76,10 +80,12 @@ fetch('https://app.selektable.com/api/webhooks/orders', {
 ```
 
 ```javascript Server-side (Node.js)
-// Pass visitorId and sessionId from the client to your server,
-// then send the webhook from your backend
+// Selektable.getIdentity() is NOT available on the server.
+// The client must send visitorId and sessionId to your backend
+// (e.g., via hidden form fields or a fetch call during checkout).
 
 app.post('/checkout/complete', async (req, res) => {
+  // visitorId and sessionId were passed from the client
   const { visitorId, sessionId, order } = req.body;
 
   await fetch('https://app.selektable.com/api/webhooks/orders', {
@@ -110,8 +116,9 @@ app.post('/checkout/complete', async (req, res) => {
 ```
 
 ```php PHP
-// In your order confirmation handler
-$visitor_id = $_POST['visitorId']; // Passed from client-side
+// Selektable.getIdentity() is NOT available on the server.
+// These values must be passed from the client (e.g., hidden form fields).
+$visitor_id = $_POST['visitorId'];
 $session_id = $_POST['sessionId'];
 
 $payload = json_encode([
@@ -145,6 +152,25 @@ curl_close($ch);
 ```
 
 </CodeGroup>
+
+<Tip>
+  For the server-side approach, add hidden fields to your checkout form to pass the tracking IDs to your backend:
+
+  ```html
+  <form action="/checkout/complete" method="POST">
+    <!-- Your checkout fields -->
+    <input type="hidden" name="visitorId" id="visitorId" />
+    <input type="hidden" name="sessionId" id="sessionId" />
+    <button type="submit">Place order</button>
+  </form>
+
+  <script>
+    var identity = Selektable.getIdentity();
+    document.getElementById('visitorId').value = identity.visitorId;
+    document.getElementById('sessionId').value = identity.sessionId;
+  </script>
+  ```
+</Tip>
 
 <Warning>
   The `productId` in your items should match the `productId` you pass to `Selektable.open()` on your product pages. This is how Selektable links a purchase to a specific product visualization.
@@ -241,10 +267,12 @@ fetch('https://app.selektable.com/api/webhooks/orders', {
 ```
 
 ```javascript Server-side (Node.js)
-// Pass visitorId and sessionId from the client to your server
-// via hidden form fields, then send the webhook from your backend
+// Selektable.getIdentity() is NOT available on the server.
+// The client must send visitorId and sessionId to your backend
+// via hidden form fields (see tip below).
 
 app.post('/appointment/book', async (req, res) => {
+  // visitorId and sessionId were passed from the client
   const { visitorId, sessionId, name, email, phone } = req.body;
 
   // Save the appointment in your system
@@ -274,6 +302,8 @@ app.post('/appointment/book', async (req, res) => {
 ```
 
 ```php PHP
+// Selektable.getIdentity() is NOT available on the server.
+// These values must be passed from the client (e.g., hidden form fields).
 $visitor_id = $_POST['visitorId'];
 $session_id = $_POST['sessionId'];
 
@@ -393,8 +423,8 @@ Content-Type: application/json
 | `orderId` | `string` | Yes | Unique identifier for this conversion (order ID, form submission ID, etc.) |
 | `storeId` | `string` | Yes | Your Selektable store ID |
 | `organizationId` | `string` | Yes | Your Selektable organization ID |
-| `visitorId` | `string` | Yes | From `Selektable.getIdentity().visitorId` |
-| `sessionId` | `string` | Yes | From `Selektable.getIdentity().sessionId` |
+| `visitorId` | `string` | Yes | From `Selektable.getIdentity().visitorId` (client-side only) |
+| `sessionId` | `string` | Yes | From `Selektable.getIdentity().sessionId` (client-side only) |
 | `totalCents` | `integer` | Yes | Order total in cents, or `0` for lead gen |
 | `currency` | `string` | Yes | 3-letter currency code (e.g., `USD`, `EUR`) |
 | `platform` | `string` | Yes | Must be `"custom"` |
