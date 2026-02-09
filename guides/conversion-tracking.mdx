@@ -19,7 +19,13 @@ For WooCommerce and Shopify stores, conversion tracking is handled automatically
 ## Prerequisites
 
 - The Selektable embed script must be loaded on your site, including the thank you / confirmation page
-- You need your **store ID** and **organization ID** from the [dashboard](https://app.selektable.com)
+- You need your **store ID**, **organization ID**, and **API key** from the [dashboard](https://app.selektable.com)
+
+API keys start with `sel_` and are used as a Bearer token in the `Authorization` header of every webhook request.
+
+<Warning>
+  Your API key is a secret. If you send the webhook from client-side JavaScript, the key will be visible in browser dev tools. For production use, prefer sending the webhook from your server where the key can be kept private.
+</Warning>
 
 <Note>
   The embed script must be present on the thank you page so that the visitor and session IDs are accessible. If you load the script site-wide (recommended), this is already covered.
@@ -55,7 +61,10 @@ const identity = Selektable.getIdentity();
 
 fetch('https://app.selektable.com/api/webhooks/orders', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer sel_your_api_key'
+  },
   body: JSON.stringify({
     orderId: 'order-789',          // Your order ID
     storeId: 'store_xxx',          // From dashboard
@@ -90,7 +99,10 @@ app.post('/checkout/complete', async (req, res) => {
 
   await fetch('https://app.selektable.com/api/webhooks/orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer sel_your_api_key'
+    },
     body: JSON.stringify({
       orderId: order.id,
       storeId: 'store_xxx',
@@ -145,7 +157,10 @@ $payload = json_encode([
 $ch = curl_init('https://app.selektable.com/api/webhooks/orders');
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer sel_your_api_key',
+]);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_exec($ch);
 curl_close($ch);
@@ -208,7 +223,10 @@ curl_close($ch);
 
       fetch('https://app.selektable.com/api/webhooks/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sel_your_api_key'
+        },
         body: JSON.stringify({
           orderId: orderData.orderId,
           storeId: 'store_xxx',
@@ -249,7 +267,10 @@ const identity = Selektable.getIdentity();
 
 fetch('https://app.selektable.com/api/webhooks/orders', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer sel_your_api_key'
+  },
   body: JSON.stringify({
     orderId: 'lead-' + Date.now(),   // Unique ID for this submission
     storeId: 'store_xxx',            // From dashboard
@@ -281,7 +302,10 @@ app.post('/appointment/book', async (req, res) => {
   // Track the conversion in Selektable
   await fetch('https://app.selektable.com/api/webhooks/orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer sel_your_api_key'
+    },
     body: JSON.stringify({
       orderId: 'appt-' + appointment.id,
       storeId: 'store_xxx',
@@ -328,7 +352,10 @@ $payload = json_encode([
 $ch = curl_init('https://app.selektable.com/api/webhooks/orders');
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer sel_your_api_key',
+]);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_exec($ch);
 curl_close($ch);
@@ -382,7 +409,10 @@ curl_close($ch);
 
       fetch('https://app.selektable.com/api/webhooks/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sel_your_api_key'
+        },
         body: JSON.stringify({
           orderId: 'lead-' + Date.now(),
           storeId: 'store_xxx',
@@ -415,6 +445,7 @@ curl_close($ch);
 
 ```
 POST https://app.selektable.com/api/webhooks/orders
+Authorization: Bearer sel_your_api_key
 Content-Type: application/json
 ```
 
@@ -457,8 +488,12 @@ You'll see:
 ## Troubleshooting
 
 <AccordionGroup>
+  <Accordion title="Webhook returns 401 Unauthorized">
+    Make sure you're including the `Authorization` header with a valid API key. The format is `Bearer sel_your_api_key`. You can find your API key in the [dashboard](https://app.selektable.com).
+  </Accordion>
   <Accordion title="Conversions aren't showing in the dashboard">
     Verify that:
+    - The `Authorization` header includes a valid API key.
     - The `visitorId` and `sessionId` are not empty. Log `Selektable.getIdentity()` on the thank you page to check.
     - The `storeId` and `organizationId` match your dashboard values.
     - The webhook returns `{ "success": true }`. Check your browser's network tab for errors.
