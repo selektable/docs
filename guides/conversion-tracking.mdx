@@ -259,136 +259,11 @@ curl_close($ch);
 
 If your site uses a contact form, appointment booking, or any non-ecommerce conversion, you can track form submissions as conversions. Set `totalCents` to `0` and pass an empty `items` array.
 
-<CodeGroup>
+There are two approaches: fire the webhook directly from the thank you page (client-side), or pass the tracking IDs through your form and send the webhook from your server.
 
-```javascript Client-side (thank you page)
-// On your thank you / confirmation page
-const identity = Selektable.getIdentity();
+### Option A: Client-side (thank you page)
 
-fetch('https://app.selektable.com/api/webhooks/orders', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer sel_your_api_key'
-  },
-  body: JSON.stringify({
-    orderId: 'lead-' + Date.now(),   // Unique ID for this submission
-    storeId: 'store_xxx',            // From dashboard
-    organizationId: 'org_xxx',       // From dashboard
-    visitorId: identity.visitorId,
-    sessionId: identity.sessionId,
-    totalCents: 0,
-    currency: 'USD',
-    platform: 'custom',
-    status: 'completed',
-    orderCreatedAt: new Date().toISOString(),
-    items: []
-  })
-});
-```
-
-```javascript Server-side (Node.js)
-// Selektable.getIdentity() is NOT available on the server.
-// The client must send visitorId and sessionId to your backend
-// via hidden form fields (see tip below).
-
-app.post('/appointment/book', async (req, res) => {
-  // visitorId and sessionId were passed from the client
-  const { visitorId, sessionId, name, email, phone } = req.body;
-
-  // Save the appointment in your system
-  const appointment = await saveAppointment({ name, email, phone });
-
-  // Track the conversion in Selektable
-  await fetch('https://app.selektable.com/api/webhooks/orders', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer sel_your_api_key'
-    },
-    body: JSON.stringify({
-      orderId: 'appt-' + appointment.id,
-      storeId: 'store_xxx',
-      organizationId: 'org_xxx',
-      visitorId: visitorId,
-      sessionId: sessionId,
-      totalCents: 0,
-      currency: 'USD',
-      platform: 'custom',
-      status: 'completed',
-      orderCreatedAt: new Date().toISOString(),
-      items: []
-    })
-  });
-
-  res.redirect('/thank-you');
-});
-```
-
-```php PHP
-// Selektable.getIdentity() is NOT available on the server.
-// These values must be passed from the client (e.g., hidden form fields).
-$visitor_id = $_POST['visitorId'];
-$session_id = $_POST['sessionId'];
-
-// Save the appointment in your system
-$appointment_id = save_appointment($_POST);
-
-// Track the conversion in Selektable
-$payload = json_encode([
-    'orderId' => 'appt-' . $appointment_id,
-    'storeId' => 'store_xxx',
-    'organizationId' => 'org_xxx',
-    'visitorId' => $visitor_id,
-    'sessionId' => $session_id,
-    'totalCents' => 0,
-    'currency' => 'USD',
-    'platform' => 'custom',
-    'status' => 'completed',
-    'orderCreatedAt' => date('c'),
-    'items' => [],
-]);
-
-$ch = curl_init('https://app.selektable.com/api/webhooks/orders');
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json',
-    'Authorization: Bearer sel_your_api_key',
-]);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_exec($ch);
-curl_close($ch);
-```
-
-</CodeGroup>
-
-<Tip>
-  For the server-side approach, add hidden fields to your form to pass the tracking IDs to your backend:
-
-  ```html
-  <form action="/appointment/book" method="POST">
-    <!-- Your form fields -->
-    <input type="text" name="name" placeholder="Name" />
-    <input type="email" name="email" placeholder="Email" />
-
-    <!-- Hidden tracking fields (populated by JavaScript) -->
-    <input type="hidden" name="visitorId" id="visitorId" />
-    <input type="hidden" name="sessionId" id="sessionId" />
-
-    <button type="submit">Book appointment</button>
-  </form>
-
-  <script>
-    // Populate hidden fields when the form loads
-    var identity = Selektable.getIdentity();
-    document.getElementById('visitorId').value = identity.visitorId;
-    document.getElementById('sessionId').value = identity.sessionId;
-  </script>
-  ```
-</Tip>
-
-### Full example: thank you page
+Add this script to the page the customer sees after submitting the form. The embed script must be loaded on this page so that `Selektable.getIdentity()` can read the tracking IDs from the browser.
 
 ```html
 <!DOCTYPE html>
@@ -440,6 +315,107 @@ curl_close($ch);
 </body>
 </html>
 ```
+
+### Option B: Server-side
+
+`Selektable.getIdentity()` is a browser API and is **not available on your server**. To send the webhook from your backend, you need to pass the tracking IDs from the browser through your form using hidden fields.
+
+**Step 1:** Add hidden fields to your form that capture the tracking IDs before submission.
+
+```html
+<form action="/appointment/book" method="POST">
+  <!-- Your form fields -->
+  <input type="text" name="name" placeholder="Name" />
+  <input type="email" name="email" placeholder="Email" />
+  <input type="tel" name="phone" placeholder="Phone" />
+
+  <!-- Hidden tracking fields (populated by JavaScript) -->
+  <input type="hidden" name="visitorId" id="visitorId" />
+  <input type="hidden" name="sessionId" id="sessionId" />
+
+  <button type="submit">Book appointment</button>
+</form>
+
+<script>
+  // Populate hidden fields when the page loads
+  var identity = Selektable.getIdentity();
+  document.getElementById('visitorId').value = identity.visitorId;
+  document.getElementById('sessionId').value = identity.sessionId;
+</script>
+```
+
+**Step 2:** On your server, read the tracking IDs from the form submission and send the webhook.
+
+<CodeGroup>
+
+```javascript Node.js
+app.post('/appointment/book', async (req, res) => {
+  const { visitorId, sessionId, name, email, phone } = req.body;
+
+  // Save the appointment in your system
+  const appointment = await saveAppointment({ name, email, phone });
+
+  // Track the conversion in Selektable
+  await fetch('https://app.selektable.com/api/webhooks/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer sel_your_api_key'
+    },
+    body: JSON.stringify({
+      orderId: 'appt-' + appointment.id,
+      storeId: 'store_xxx',
+      organizationId: 'org_xxx',
+      visitorId: visitorId,
+      sessionId: sessionId,
+      totalCents: 0,
+      currency: 'USD',
+      platform: 'custom',
+      status: 'completed',
+      orderCreatedAt: new Date().toISOString(),
+      items: []
+    })
+  });
+
+  res.redirect('/thank-you');
+});
+```
+
+```php PHP
+$visitor_id = $_POST['visitorId'];
+$session_id = $_POST['sessionId'];
+
+// Save the appointment in your system
+$appointment_id = save_appointment($_POST);
+
+// Track the conversion in Selektable
+$payload = json_encode([
+    'orderId' => 'appt-' . $appointment_id,
+    'storeId' => 'store_xxx',
+    'organizationId' => 'org_xxx',
+    'visitorId' => $visitor_id,
+    'sessionId' => $session_id,
+    'totalCents' => 0,
+    'currency' => 'USD',
+    'platform' => 'custom',
+    'status' => 'completed',
+    'orderCreatedAt' => date('c'),
+    'items' => [],
+]);
+
+$ch = curl_init('https://app.selektable.com/api/webhooks/orders');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer sel_your_api_key',
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_exec($ch);
+curl_close($ch);
+```
+
+</CodeGroup>
 
 ## Webhook payload reference
 
