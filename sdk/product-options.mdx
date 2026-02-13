@@ -27,6 +27,9 @@ interface ProductOptions {
   is_purchasable?: boolean;
   is_in_stock?: boolean;
 
+  // Physical product dimensions (for AI-accurate sizing)
+  dimensions?: ProductDimensions;
+
   // Cart callbacks
   onAddToCart?: (product, quantity, variation?) => Promise<CartResult> | CartResult | void;
   onViewCart?: () => void;
@@ -117,6 +120,43 @@ These fields are primarily used for WooCommerce-style variable products where a 
 <ParamField path="is_in_stock" type="boolean">
   Whether the product is in stock.
 </ParamField>
+
+## Product dimensions
+
+Optional physical measurements that help the AI render the product at its real-world size relative to the room.
+
+<ParamField path="dimensions" type="ProductDimensions">
+  Physical dimensions of the product. When provided, the AI uses these measurements to calculate correct proportions relative to the room and other objects in the scene.
+
+  ```typescript
+  {
+    width?: number;    // Width of the product
+    height?: number;   // Height of the product
+    depth?: number;    // Depth of the product
+    unit: 'cm' | 'in' | 'mm';  // Unit of measurement (required)
+  }
+  ```
+
+  At least one dimension value (`width`, `height`, or `depth`) should be provided alongside the `unit`.
+</ParamField>
+
+```javascript
+Selektable.open('widget_abc123', {
+  productId: 'sofa-001',
+  productTitle: 'Modern Blue Sofa',
+  productImage: 'https://myshop.com/images/sofa.jpg',
+  dimensions: {
+    width: 220,
+    height: 85,
+    depth: 95,
+    unit: 'cm'
+  }
+});
+```
+
+<Tip>
+  Providing dimensions is especially useful for furniture and home decor products where accurate sizing in the room visualization makes a big difference.
+</Tip>
 
 ## Cart callbacks
 
