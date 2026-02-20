@@ -24,7 +24,7 @@ The easiest way to integrate Selektable with WooCommerce is the official plugin.
     After installation, click **Activate Plugin**.
   </Step>
   <Step title="Configure">
-    Go to **WooCommerce → Settings → Selektable** and enter your Widget ID and App URL from the dashboard.
+    Go to **Settings → Selektable**, enter your **Store ID** from the dashboard under General Settings, then click **Add New** to add an integration with your **Widget ID**.
   </Step>
 </Steps>
 
@@ -46,15 +46,17 @@ If you prefer not to use the plugin, you can add the integration manually via yo
 ### 1. Add the embed script
 
 ```php
-// Set your widget ID and app URL
+// Set your store ID, widget ID and app URL
+define('SELEKTABLE_STORE_ID', 'store_xxx');
 define('SELEKTABLE_WIDGET_ID', 'widget_abc123');
 define('SELEKTABLE_APP_URL', 'https://app.selektable.com');
 
 // Add embed script to footer
 add_action('wp_footer', function() {
     printf(
-        '<script src="%s/widgets/embed.js" async></script>',
-        esc_url(SELEKTABLE_APP_URL)
+        '<script src="%s/widgets/embed.js" data-store-id="%s" async></script>',
+        esc_url(SELEKTABLE_APP_URL),
+        esc_attr(SELEKTABLE_STORE_ID)
     );
 });
 ```

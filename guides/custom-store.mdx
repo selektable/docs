@@ -46,10 +46,10 @@ Each store can have multiple widgets. You need at least one to get started.
 
 ## Step 3: Add the embed script
 
-Add the Selektable script to every page where you want the widget available. Place it before the closing `</body>` tag:
+Add the Selektable script to every page where you want the widget available. Place it before the closing `</body>` tag. Replace `store_xxx` with your Store ID from the dashboard:
 
 ```html
-<script src="https://app.selektable.com/widgets/embed.js" async></script>
+<script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
 ```
 
 <Tip>
@@ -221,7 +221,7 @@ Here's a complete product page integration:
   <button onclick="addToCart()">Add to Cart</button>
   <button onclick="openVisualizer()">View in Your Room</button>
 
-  <script src="https://app.selektable.com/widgets/embed.js" async></script>
+  <script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
   <script>
     function openVisualizer() {
       Selektable.open('widget_abc123', {

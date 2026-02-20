@@ -13,16 +13,19 @@ This guide walks you through embedding a Selektable widget on your site.
 - A store created in the dashboard
 - A widget configured for your store (Room Visualizer or Virtual Try-On)
 
-## Step 1: Get your widget ID
+## Step 1: Get your IDs
 
-After creating a widget in the Selektable dashboard, you'll receive a **widget ID** (e.g., `widget_abc123`). Copy this. You'll need it for the embed code.
+In the Selektable dashboard, copy two identifiers you'll need:
+
+- **Store ID** (e.g., `store_xxx`) — found in your store settings
+- **Widget ID** (e.g., `widget_abc123`) — found in your widget settings
 
 ## Step 2: Add the embed script
 
-Add the Selektable embed script before the closing `</body>` tag on your site:
+Add the Selektable embed script before the closing `</body>` tag on your site. Replace `store_xxx` with your Store ID:
 
 ```html
-<script src="https://app.selektable.com/widgets/embed.js" async></script>
+<script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
 ```
 
 <Note>

@@ -9,10 +9,10 @@ The Selektable SDK is loaded via a script tag. No npm packages or build tools re
 
 ## Script tag
 
-Add the embed script before the closing `</body>` tag on every page where you want the widget available:
+Add the embed script before the closing `</body>` tag on every page where you want the widget available. Replace `store_xxx` with your Store ID from the Selektable dashboard:
 
 ```html
-<script src="https://app.selektable.com/widgets/embed.js" async></script>
+<script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
 ```
 
 <Note>
@@ -68,7 +68,7 @@ You only need one script tag per page, even if you have multiple widgets. The SD
 
 ```html
 <!-- One script tag -->
-<script src="https://app.selektable.com/widgets/embed.js" async></script>
+<script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
 
 <!-- Multiple widgets -->
 <button onclick="Selektable.open('widget_room')">Room Visualizer</button>

@@ -11,10 +11,10 @@ Integrate Selektable into your Shopify store by adding the embed script and widg
 
 ### 1. Add the embed script
 
-Add the script to your theme's `theme.liquid` file, before the closing `</body>` tag:
+Add the script to your theme's `theme.liquid` file, before the closing `</body>` tag. Replace `store_xxx` with your Store ID from the Selektable dashboard:
 
 ```liquid
-<script src="https://app.selektable.com/widgets/embed.js" async></script>
+<script src="https://app.selektable.com/widgets/embed.js" data-store-id="store_xxx" async></script>
 ```
 
 ### 2. Add the widget button
