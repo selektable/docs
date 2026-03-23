@@ -16,6 +16,64 @@ For WooCommerce and Shopify stores, conversion tracking is handled automatically
 3. When a conversion happens (purchase, form submission, etc.), your server sends a webhook to Selektable that includes the same IDs
 4. Selektable's attribution engine matches the conversion to any recent visualizations within the attribution window (default: 7 days)
 
+## Client-side tracking
+
+If your site doesn't have a backend (static sites, no-code platforms, or client-rendered apps), you can track conversions directly from the browser using the embed script. No API key or server-side code needed.
+
+<Info>
+  For sites with server access, we recommend the [server-side webhook](#ecommerce-order-tracking) below. It's more secure because the API key is never exposed to the browser.
+</Info>
+
+### Prerequisites
+
+- The Selektable embed script must be loaded on both your product pages **and** your thank-you or confirmation page
+- You need your **store ID** from the [dashboard](https://app.selektable.com) (already in the embed script tag)
+
+### Ecommerce order tracking
+
+On your thank-you or order confirmation page, call `Selektable.track()` with the order details:
+
+```javascript
+Selektable.track('$conversion', {
+  orderId: 'order-123',
+  totalCents: 4999,
+  currency: 'EUR',
+  items: [
+    { productId: '456', quantity: 1, priceCents: 4999, totalCents: 4999 }
+  ]
+});
+```
+
+The `productId` in your items should match the `productId` you pass to `Selektable.open()` on your product pages.
+
+### Lead gen / appointment tracking
+
+For non-ecommerce conversions (form submissions, bookings), just pass an `orderId`:
+
+```javascript
+Selektable.track('$conversion', {
+  orderId: 'lead-' + Date.now()
+});
+```
+
+Defaults to `totalCents: 0`, `currency: 'USD'`, `status: 'completed'`, and empty `items`.
+
+### Property reference
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `orderId` | `string` | Yes | — | Unique identifier for this conversion |
+| `totalCents` | `integer` | No | `0` | Order total in cents, or `0` for leads |
+| `currency` | `string` | No | `'USD'` | 3-letter currency code |
+| `status` | `string` | No | `'completed'` | One of: `pending`, `processing`, `on-hold`, `completed`, `refunded`, `cancelled` |
+| `items` | `array` | No | `[]` | Order items (see [webhook reference](#webhook-payload-reference) for item fields) |
+
+### Deduplication
+
+The SDK automatically prevents duplicate tracking when a customer refreshes the thank-you page. Each `orderId` is only sent once per browser session.
+
+---
+
 ## Prerequisites
 
 - The Selektable embed script must be loaded on your site, including pages with forms or checkout

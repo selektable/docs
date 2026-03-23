@@ -118,3 +118,41 @@ Use this after dynamically adding widget elements to the page (e.g., in SPAs).
      data-product-images='[{"id":1,"src":"https://example.com/sofa.jpg","alt":"Sofa"}]'>
 </div>
 ```
+
+---
+
+## `track(eventName, properties?)`
+
+Tracks a named event with optional properties. Currently supports the `$conversion` system event for tracking purchases and leads.
+
+```javascript
+Selektable.track('$conversion', {
+  orderId: 'order-123',
+  totalCents: 4999,
+  currency: 'EUR',
+  items: [
+    { productId: '456', quantity: 1, priceCents: 4999, totalCents: 4999 }
+  ]
+});
+```
+
+<ParamField path="eventName" type="string" required>
+  The event name. Use `$conversion` for purchase and lead tracking.
+</ParamField>
+
+<ParamField path="properties" type="Record<string, unknown>">
+  Event properties. For `$conversion`, see the [property reference](/guides/conversion-tracking#property-reference).
+</ParamField>
+
+**Behavior:**
+- Only `$conversion` events are processed; other event names are silently ignored
+- Automatically includes store ID, visitor ID, and session ID
+- Deduplicates by `orderId` within the browser session (prevents double-tracking on page refresh)
+- Fire-and-forget — does not return a value or block page navigation
+- Requires the embed script to be loaded on the page
+
+**Supported events:**
+
+| Event | Description |
+|-------|-------------|
+| `$conversion` | Purchase or lead conversion. See [Conversion tracking](/guides/conversion-tracking#client-side-tracking). |
