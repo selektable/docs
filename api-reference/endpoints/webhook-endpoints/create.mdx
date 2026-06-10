@@ -1,0 +1,10 @@
+---
+title: Create a webhook endpoint
+openapi: "POST /v1/webhook-endpoints"
+---
+
+Register an HTTPS URL to receive signed events when generations reach a terminal state. See [Webhooks](/api-reference/webhooks) for the event payload shape and signature verification.
+
+<Warning>
+The response includes the signing **`secret`** — shown **once**. Store it securely before discarding the response.
+</Warning>

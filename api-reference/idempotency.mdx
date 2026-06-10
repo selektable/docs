@@ -1,0 +1,30 @@
+---
+title: Idempotency
+description: Safely retry generation requests without creating duplicates
+---
+
+`POST /v1/generations` accepts an **`Idempotency-Key`** header. Sending the same key twice (within your organization) returns the **original** generation with a `200` instead of creating a new one — safe to retry on network failures.
+
+```bash
+curl -X POST https://api.selektable.com/v1/generations \
+  -H "Authorization: Bearer selektable_xxx" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-12345-attempt-1" \
+  -d '{ "...": "..." }'
+```
+
+## Behavior
+
+- **First call:** `202 Accepted` — creates and queues the generation.
+- **Repeat call with same key:** `200 OK` — returns the original generation object, no new work is queued.
+- **Same key, different body:** still returns the **original** generation. The new body is ignored. Pick a fresh key per logical request (e.g. `order-12345-attempt-1` → `order-12345-attempt-2`).
+
+## Choosing keys
+
+A good idempotency key is **unique per logical action**, not per HTTP request:
+
+- Order ID + attempt counter: `order-12345-attempt-1`
+- UUID per user action: `f3c8d1a4-...`
+- Job ID from your queue: `job-9a8b7c`
+
+Keys are stored long enough to cover normal retry windows. Don't reuse a key across unrelated requests — once bound to a generation, that's what it returns.

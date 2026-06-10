@@ -1,0 +1,8 @@
+---
+title: Retrieve a generation
+openapi: "GET /v1/generations/{id}"
+---
+
+Poll this endpoint to track status when not using [webhooks](/api-reference/webhooks). Recommended cadence: every 1–2 seconds, with a sensible overall timeout (most renders finish within ~30s).
+
+When the render finishes, `status` transitions to `complete` (with `imageUrl`) or `failed` (with `error`).

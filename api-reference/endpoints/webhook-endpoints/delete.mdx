@@ -1,0 +1,6 @@
+---
+title: Delete a webhook endpoint
+openapi: "DELETE /v1/webhook-endpoints/{id}"
+---
+
+Permanently delete a webhook endpoint. In-flight events queued for delivery are dropped. To pause delivery without losing configuration, [update](/api-reference/endpoints/webhook-endpoints/update) the endpoint to `status: "disabled"` instead.

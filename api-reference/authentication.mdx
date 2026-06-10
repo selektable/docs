@@ -1,0 +1,46 @@
+---
+title: Authentication
+description: Authenticate API requests with a Bearer token
+---
+
+Every request must include your API key as a Bearer token in the `Authorization` header.
+
+```bash
+curl https://api.selektable.com/v1/generations \
+  -H "Authorization: Bearer selektable_xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+## Managing keys
+
+Create and manage keys in the dashboard under **Account → API Keys**. Each key:
+
+- Is scoped to a single **store** within your organization.
+- Attributes every generation it creates to that store.
+- Is rate limited independently — see [Rate limits](/api-reference/rate-limits).
+
+Keep keys secret — treat them like passwords. If a key leaks, **delete it** in the dashboard and create a new one. There is no rotation grace period.
+
+## Required state
+
+The public API requires an **active subscription**. Requests from organizations without one return:
+
+```json
+{
+  "error": {
+    "type": "authorization_error",
+    "code": "subscription_required",
+    "message": "An active subscription is required to use the API."
+  }
+}
+```
+
+## Error responses
+
+| Status | `code` | Cause |
+|--------|--------|-------|
+| 401 | `missing_api_key` | No `Authorization` header. |
+| 401 | `invalid_api_key` | Key not recognized or revoked. |
+| 403 | `key_disabled` | Key exists but has been disabled in the dashboard. |
+| 403 | `subscription_required` | Organization has no active subscription. |
+
+See [Errors](/api-reference/errors) for the full error envelope.

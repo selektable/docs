@@ -1,0 +1,128 @@
+---
+title: Webhooks
+description: Receive signed events when generations complete or fail
+---
+
+Webhooks are the **recommended** way to receive results. Register one or more HTTPS endpoints; Selektable POSTs a signed event when a generation reaches a terminal state.
+
+## Events
+
+| Event | Fires when |
+|-------|------------|
+| `generation.completed` | A generation finishes successfully. |
+| `generation.failed` | A generation fails (including after all retries). |
+
+Subscribe to specific events by name or use `["*"]` to receive all.
+
+## Register an endpoint
+
+```bash
+curl -X POST https://api.selektable.com/v1/webhook-endpoints \
+  -H "Authorization: Bearer selektable_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://yourapp.com/hooks/selektable",
+    "enabledEvents": ["*"]
+  }'
+```
+
+Returns `201` including the signing **`secret`** — shown **once**, store it securely:
+
+```json
+{
+  "id": "whe_xyz789",
+  "object": "webhook_endpoint",
+  "url": "https://yourapp.com/hooks/selektable",
+  "description": null,
+  "enabledEvents": ["*"],
+  "status": "enabled",
+  "createdAt": "2026-06-10T12:00:00.000Z",
+  "updatedAt": "2026-06-10T12:00:00.000Z",
+  "secret": "whsec_Base64SigningSecret..."
+}
+```
+
+Manage endpoints with the [webhook endpoint](/api-reference/endpoints/webhook-endpoints/list) routes.
+
+## Event payload
+
+```json
+{
+  "id": "evt_9f8e7d",
+  "type": "generation.completed",
+  "createdAt": "2026-06-10T12:00:05.000Z",
+  "data": {
+    "id": "agen_a1b2c3d4",
+    "object": "generation",
+    "status": "complete",
+    "imageUrl": "https://cdn.selektable.com/.../agen_a1b2c3d4.png",
+    "...": "...full generation object..."
+  }
+}
+```
+
+`data` is the same shape as the [Generation object](/api-reference/endpoints/generations/retrieve).
+
+## Verifying signatures
+
+Selektable signs every webhook using the [Standard Webhooks](https://www.standardwebhooks.com) scheme. Each request includes:
+
+| Header | Description |
+|--------|-------------|
+| `webhook-id` | Unique message id (= `event.id`). |
+| `webhook-timestamp` | Unix seconds when sent. |
+| `webhook-signature` | Space-delimited list of `v1,<signature>` values. |
+
+The signature is computed as:
+
+```
+base64( HMAC_SHA256( secret, "{webhook-id}.{webhook-timestamp}.{rawBody}" ) )
+```
+
+where `secret` is the **base64-decoded** portion of your `whsec_` key (everything after the `whsec_` prefix).
+
+### Node.js example
+
+```js
+import crypto from 'node:crypto';
+
+function verifySelektableWebhook(req, secret) {
+  const id = req.headers['webhook-id'];
+  const timestamp = req.headers['webhook-timestamp'];
+  const signatureHeader = req.headers['webhook-signature'];
+  const rawBody = req.rawBody; // the exact bytes received
+
+  // Reject stale messages (guards against replay)
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (age > 300) throw new Error('Timestamp too old');
+
+  const key = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+  const signedContent = `${id}.${timestamp}.${rawBody}`;
+  const expected =
+    'v1,' + crypto.createHmac('sha256', key).update(signedContent).digest('base64');
+
+  const ok = signatureHeader
+    .split(' ')
+    .some(
+      (candidate) =>
+        candidate.length === expected.length &&
+        crypto.timingSafeEqual(Buffer.from(candidate), Buffer.from(expected))
+    );
+
+  if (!ok) throw new Error('Invalid signature');
+}
+```
+
+<Warning>
+Always verify against the **raw request body** before parsing JSON. Re-serializing parsed JSON changes whitespace and breaks signature verification.
+</Warning>
+
+## Delivery & retries
+
+- Endpoints should return a **`2xx`** status quickly (within ~10 seconds).
+- Non-2xx responses are retried with exponential backoff (up to 5 attempts).
+- Make your handler **idempotent** by deduplicating on `event.id` — under retry, the same event may arrive more than once.
+
+## Polling alternative
+
+If you can't accept webhooks, poll [`GET /v1/generations/{id}`](/api-reference/endpoints/generations/retrieve) until `status` is `complete` or `failed`. Recommended cadence: every 1–2 seconds, with a sensible overall timeout (most renders finish within ~30s). Webhooks and polling can be used together.

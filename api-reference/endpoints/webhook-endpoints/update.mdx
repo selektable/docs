@@ -1,0 +1,8 @@
+---
+title: Update a webhook endpoint
+openapi: "PATCH /v1/webhook-endpoints/{id}"
+---
+
+Update a webhook endpoint's URL, description, enabled events, or status. Fields you don't include are left unchanged.
+
+To temporarily stop delivery without losing the endpoint configuration, set `status` to `disabled`.

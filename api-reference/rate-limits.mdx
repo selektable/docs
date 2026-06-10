@@ -1,0 +1,38 @@
+---
+title: Rate limits
+description: Per-key request limits and how to back off
+---
+
+Each API key is rate limited independently. The default ceiling is **100 requests per minute**.
+
+Successful responses include the per-window maximum in the `X-RateLimit-Limit` header.
+
+## When you hit the limit
+
+Exceeding the limit returns `429 Too Many Requests` with a `rate_limit_error`:
+
+```json
+{
+  "error": {
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded",
+    "message": "Too many requests. Slow down."
+  }
+}
+```
+
+Back off and retry. A simple exponential strategy works well:
+
+```js
+let delay = 1000;
+for (let attempt = 0; attempt < 5; attempt++) {
+  const res = await fetch(url, opts);
+  if (res.status !== 429) return res;
+  await new Promise((r) => setTimeout(r, delay));
+  delay *= 2;
+}
+```
+
+## Raising the limit
+
+If your workload genuinely needs a higher ceiling — for example a large catalog backfill — contact support to discuss a per-organization increase.

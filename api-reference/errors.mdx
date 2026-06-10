@@ -1,0 +1,45 @@
+---
+title: Errors
+description: Error envelope, status codes, and what each one means
+---
+
+All errors share one envelope:
+
+```json
+{
+  "error": {
+    "type": "invalid_request_error",
+    "code": "invalid_request",
+    "message": "image must be an https URL or a data:image/* URI",
+    "param": "image"
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `type` | High-level category — one of the values in the table below. |
+| `code` | Machine-readable specific reason (e.g. `subscription_required`, `invalid_image_url`). |
+| `message` | Human-readable explanation. Do not parse. |
+| `param` | When the error is about a request field, the JSON path of the offending field. |
+
+## Status codes
+
+| Status | `type` | Meaning |
+|--------|--------|---------|
+| 400 | `invalid_request_error` | Malformed body or invalid field (`param` points at it). |
+| 401 | `authentication_error` | Missing, invalid, or expired API key. |
+| 403 | `authorization_error` | Key disabled, missing metadata, or no active subscription. |
+| 404 | `not_found_error` | Resource does not exist. |
+| 409 | `conflict_error` | Conflicting request (e.g. duplicate webhook URL). |
+| 429 | `rate_limit_error` | Too many requests — see [Rate limits](/api-reference/rate-limits). |
+| 500 | `api_error` | Unexpected server error. Retry with backoff. |
+
+## Handling errors
+
+- **`400` invalid_request_error** — your bug. Inspect `param` and fix the request. Do not retry without changes.
+- **`401` / `403`** — credential or subscription issue. Don't retry; surface to the operator.
+- **`404`** — usually a stale ID. Don't retry.
+- **`409`** — fix the conflict (e.g. choose a different URL) and retry.
+- **`429`** — back off exponentially and retry.
+- **`500`** — server-side. Retry with exponential backoff.

@@ -1,0 +1,10 @@
+---
+title: Create a generation
+openapi: "POST /v1/generations"
+---
+
+Starts an asynchronous AI visualization from a customer photo plus 1–3 products. Returns `202 Accepted` with a `processing` generation.
+
+Learn the outcome via [webhooks](/api-reference/webhooks) (recommended) or by [polling the generation](/api-reference/endpoints/generations/retrieve).
+
+Supply an [`Idempotency-Key`](/api-reference/idempotency) header to safely retry on network failures.

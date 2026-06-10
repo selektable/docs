@@ -12,6 +12,7 @@
     "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.svg",
+  "openapi": "https://api.selektable.com/v1/openapi.json",
   "topbarLinks": [
     {
       "name": "llms.txt",
@@ -30,6 +31,10 @@
     {
       "name": "SDK Reference",
       "url": "sdk"
+    },
+    {
+      "name": "API Reference",
+      "url": "api-reference"
     }
   ],
   "navigation": [
@@ -80,6 +85,35 @@
         "sdk/examples/cart-integration",
         "sdk/examples/multi-product",
         "sdk/examples/advanced"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/authentication",
+        "api-reference/idempotency",
+        "api-reference/webhooks",
+        "api-reference/rate-limits",
+        "api-reference/errors"
+      ]
+    },
+    {
+      "group": "Generations",
+      "pages": [
+        "api-reference/endpoints/generations/create",
+        "api-reference/endpoints/generations/retrieve",
+        "api-reference/endpoints/generations/list"
+      ]
+    },
+    {
+      "group": "Webhook Endpoints",
+      "pages": [
+        "api-reference/endpoints/webhook-endpoints/create",
+        "api-reference/endpoints/webhook-endpoints/list",
+        "api-reference/endpoints/webhook-endpoints/retrieve",
+        "api-reference/endpoints/webhook-endpoints/update",
+        "api-reference/endpoints/webhook-endpoints/delete"
       ]
     }
   ],

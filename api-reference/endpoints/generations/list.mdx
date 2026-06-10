@@ -1,0 +1,16 @@
+---
+title: List generations
+openapi: "GET /v1/generations"
+---
+
+Cursor-paginated, newest first.
+
+To page: take the last `id` in `data` and pass it as `starting_after` on the next request. Keep paging while `hasMore` is `true`.
+
+```json
+{
+  "object": "list",
+  "data": [ { "id": "agen_...", "object": "generation", "...": "..." } ],
+  "hasMore": true
+}
+```
