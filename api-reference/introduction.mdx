@@ -33,7 +33,7 @@ The endpoint pages in this section are generated from that spec, so they always 
 1. Create an [API key](/api-reference/authentication) in the dashboard under **Account → API Keys**.
 2. [Register a webhook endpoint](/api-reference/endpoints/webhook-endpoints/create) so you can receive results.
 3. [Create a generation](/api-reference/endpoints/generations/create) with a customer photo and 1–3 products.
-4. Verify the signature on incoming webhook events and use the `imageUrl` from the payload.
+4. Verify the signature on incoming webhook events and use the `imageUrl` from the payload — or pick a smaller `imageVariants.{list,card,detail}` URL when you're embedding in emails, lists, or mobile.
 
 ## Requirements
 

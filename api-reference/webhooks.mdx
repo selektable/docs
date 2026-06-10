@@ -56,6 +56,11 @@ Manage endpoints with the [webhook endpoint](/api-reference/endpoints/webhook-en
     "object": "generation",
     "status": "complete",
     "imageUrl": "https://cdn.selektable.com/.../agen_a1b2c3d4.png",
+    "imageVariants": {
+      "list":   { "url": "https://cdn.selektable.com/cdn-cgi/image/width=200,quality=70,format=auto,fit=scale-down/.../agen_a1b2c3d4.png",  "width": 200  },
+      "card":   { "url": "https://cdn.selektable.com/cdn-cgi/image/width=600,quality=80,format=auto,fit=scale-down/.../agen_a1b2c3d4.png",  "width": 600  },
+      "detail": { "url": "https://cdn.selektable.com/cdn-cgi/image/width=1200,quality=85,format=auto,fit=scale-down/.../agen_a1b2c3d4.png", "width": 1200 }
+    },
     "...": "...full generation object..."
   }
 }

@@ -5,4 +5,6 @@ openapi: "GET /v1/generations/{id}"
 
 Poll this endpoint to track status when not using [webhooks](/api-reference/webhooks). Recommended cadence: every 1–2 seconds, with a sensible overall timeout (most renders finish within ~30s).
 
-When the render finishes, `status` transitions to `complete` (with `imageUrl`) or `failed` (with `error`).
+When the render finishes, `status` transitions to `complete` (with `imageUrl` and `imageVariants`) or `failed` (with `error`).
+
+`imageVariants` exposes resized, CDN-cached versions of `imageUrl` (`list` / `card` / `detail`) for surfaces where the full-resolution render is overkill — emails, lists, mobile. Names describe the intended surface, so pick by where you're rendering, not by pixel width.
